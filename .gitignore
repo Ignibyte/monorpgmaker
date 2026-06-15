@@ -1,0 +1,30 @@
+# Build output
+bin/
+obj/
+artifacts/
+*.user
+*.suo
+.vs/
+
+# Test / coverage
+[Tt]est[Rr]esults/
+coverage/
+*.coverage
+*.cobertura.xml
+
+# Rider / VS Code
+.idea/
+.vscode/
+
+# macOS
+.DS_Store
+
+# MonoGame content intermediates
+**/Content/bin/
+**/Content/obj/
+
+# Forge sidecar wiring — holds the bearer token (copy from .mcp.json.example)
+.mcp.json
+
+# Local run logs
+.run/

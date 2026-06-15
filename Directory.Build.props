@@ -1,0 +1,11 @@
+<Project>
+  <!--
+    Shared build settings for every project in the solution. Kept central so the
+    quality gate (bin/gate.sh) can tighten warnings/analyzers in one place.
+  -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+  </PropertyGroup>
+</Project>

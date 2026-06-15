@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MonoRpgMaker.Editor/MonoRpgMaker.Editor.csproj" />
+    <Project Path="src/MonoRpgMaker.Engine/MonoRpgMaker.Engine.csproj" />
+    <Project Path="src/MonoRpgMaker.Player/MonoRpgMaker.Player.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MonoRpgMaker.Engine.Tests/MonoRpgMaker.Engine.Tests.csproj" />
+  </Folder>
+</Solution>
