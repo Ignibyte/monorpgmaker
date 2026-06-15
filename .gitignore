@@ -32,3 +32,6 @@ coverage/
 # Stryker mutation testing output
 StrykerOutput/
 **/StrykerOutput/
+
+# Harness scheduled-task lock
+.claude/*.lock
