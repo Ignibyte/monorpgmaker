@@ -2,10 +2,19 @@
   <!--
     Shared build settings for every project in the solution. Kept central so the
     quality gate (bin/gate.sh) can tighten warnings/analyzers in one place.
+
+    Roslyn analyzers are ON (warnings show in the IDE + normal builds); the gate
+    makes them blocking with `dotnet build -warnaserror`, so the inner dev loop
+    stays usable while `/commit` is strict (CONSTITUTION §0).
   -->
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>disable</ImplicitUsings>
+
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
 </Project>

@@ -1,0 +1,27 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+[*.cs]
+indent_size = 4
+# Analyzer severities default to AnalysisLevel=latest-recommended (Directory.Build.props);
+# the gate (bin/gate.sh gate:2) makes warnings errors. Tune genuinely-inapplicable
+# rules here (visible + reviewable config, not an inline suppression).
+
+[*.{json,jsonc,yml,yaml,csproj,props,targets,slnx}]
+indent_size = 2
+
+[*.sh]
+indent_size = 4
+
+# Test projects: xUnit method names use Method_Scenario_Expectation underscores,
+# and test classes are public for discovery — both clash with general API naming
+# rules that don't apply to test code.
+[tests/**.cs]
+dotnet_diagnostic.CA1707.severity = none
+dotnet_diagnostic.CA1515.severity = none

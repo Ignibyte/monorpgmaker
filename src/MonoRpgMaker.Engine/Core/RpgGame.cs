@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -11,6 +12,13 @@ namespace MonoRpgMaker.Engine.Core;
 /// previews maps through the same engine types. Game-specific behaviour is layered
 /// on by overriding the MonoGame lifecycle hooks.
 /// </summary>
+/// <remarks>
+/// Excluded from coverage: this is the composition/host root — it owns the live
+/// MonoGame loop (window, GPU, input) with no unit-testable contract, the C#
+/// analogue of an excluded <c>main</c>. The testable world/entity/data logic it
+/// drives lives in their own classes and is covered there.
+/// </remarks>
+[ExcludeFromCodeCoverage]
 public class RpgGame : Game
 {
     private readonly GraphicsDeviceManager _graphics;

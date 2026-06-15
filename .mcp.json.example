@@ -1,0 +1,12 @@
+{
+  "_comment": "Copy to .mcp.json (gitignored). Bearer is monorpgmaker's forge API key (projects.slug='monorpgmaker'). Requires the shared sidecar running: ~/Projects/oathstar-forge/scripts/start-all.sh",
+  "mcpServers": {
+    "forge": {
+      "type": "http",
+      "url": "http://127.0.0.1:8080/mcp/forge",
+      "headers": {
+        "Authorization": "Bearer forge_pk_REPLACE_ME"
+      }
+    }
+  }
+}

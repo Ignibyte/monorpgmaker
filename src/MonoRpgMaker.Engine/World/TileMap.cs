@@ -11,10 +11,8 @@ public sealed class TileMap
     /// <summary>Create an all-empty map of the given tile dimensions.</summary>
     public TileMap(int width, int height)
     {
-        if (width <= 0)
-            throw new ArgumentOutOfRangeException(nameof(width));
-        if (height <= 0)
-            throw new ArgumentOutOfRangeException(nameof(height));
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(height);
 
         Width = width;
         Height = height;

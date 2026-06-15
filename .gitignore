@@ -28,3 +28,7 @@ coverage/
 
 # Local run logs
 .run/
+
+# Stryker mutation testing output
+StrykerOutput/
+**/StrykerOutput/

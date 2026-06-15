@@ -1,0 +1,15 @@
+# gitleaks config for monorpgmaker — extends the default ruleset with the
+# project-specific secret shapes the gate must never let into a tracked file.
+# (.mcp.json holds the forge bearer but is gitignored + not in the scanned dirs.)
+[extend]
+useDefault = true
+
+[[rules]]
+id = "forge-bearer"
+description = "Forge API bearer token (oathstar-forge)"
+regex = '''forge_pk_[A-Za-z0-9]{20,}'''
+
+[[rules]]
+id = "anthropic-api-key"
+description = "Anthropic API key"
+regex = '''sk-ant-[A-Za-z0-9_-]{20,}'''

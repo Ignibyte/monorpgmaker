@@ -1,2 +1,2 @@
-﻿using var game = new MonoRpgMaker.Player.Game1();
+using var game = new MonoRpgMaker.Player.Game1();
 game.Run();
