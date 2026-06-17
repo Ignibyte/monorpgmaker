@@ -28,6 +28,29 @@ public class TileMapTests
         Assert.True(map.IsBlocked(new Point(-1, 0)));
         Assert.True(map.IsBlocked(new Point(2, 2)));
     }
+
+    [Fact]
+    public void Ctor_NonPositiveDimensions_Throw()
+    {
+        Assert.Throws<System.ArgumentOutOfRangeException>(() => new TileMap(0, 5));
+        Assert.Throws<System.ArgumentOutOfRangeException>(() => new TileMap(5, 0));
+    }
+
+    [Fact]
+    public void GetTile_And_SetTile_OffMap_Throw()
+    {
+        var map = new TileMap(2, 2);
+        Assert.Throws<System.ArgumentOutOfRangeException>(() => map.GetTile(new Point(2, 0)));
+        Assert.Throws<System.ArgumentOutOfRangeException>(() => map.SetTile(new Point(2, 0), Tile.Empty));
+    }
+
+    [Fact]
+    public void IsBlocked_AtEachBoundary_IsOffMap()
+    {
+        var map = new TileMap(2, 2);
+        Assert.True(map.IsBlocked(new Point(2, 0)));   // X == Width, Y in range
+        Assert.True(map.IsBlocked(new Point(0, 2)));   // Y == Height, X in range
+    }
 }
 
 public class EntityMovementTests

@@ -31,6 +31,13 @@ generator, NO Abstractions assembly, NO replay-hash gate):
 > decisions are designed against a known-good emit target. **MVP = the validated authoring loop, not
 > the chassis.**
 
+> **Status (2026-06-17):** the tracer slice is built (`Engine.Sim` + `Sim.Tracer` + the `RpgGame`
+> host) and green — 25/25 tests, `bin/gate.sh --fast` GREEN — via ticket #1 /
+> `WORK-m0-tracer-bullet-v1` (completed). It is the M1 extraction base. The **GO/NO-GO timing/feel
+> spike** (author the "chest gives one potion then empty" variant and time the AI-directed loop vs RPG
+> Maker's click-path; `dotnet run --project src/MonoRpgMaker.Player`) is the **pending manual step**
+> before committing to P0.
+
 ## P0 — The chassis (extracted from the tracer) + by-construction scaffolding
 
 - `MonoRpgMaker.Abstractions`; the **`FixedPoint` (Q16.16)** primitive as the *only* sim numeric type.
