@@ -18,23 +18,24 @@ point of the MonoGame rebuild is **console reach** (§ docs/technical-architectu
 ## §0 — Quality Gates (binding)
 
 The canonical gate is **`bin/gate.sh`** — the .NET analogue of a strict quality
-stack. The FULL gate (11 gates) must pass green before `/commit`; `--fast` runs
-the 9 static gates for a quick local loop but prints `GATE GREEN [fast]` — only
+stack. The FULL gate (12 gates) must pass green before `/commit`; `--fast` runs
+the 10 static gates for a quick local loop but prints `GATE GREEN [fast]` — only
 a FULL green writes the receipt the commit hook requires (§15), so `--fast`
 can't satisfy `/commit`.
 
 ```
 gate:1  format         dotnet format --verify-no-changes
-gate:2  build          dotnet build -warnaserror      (Roslyn analyzers, warnings = errors)
-gate:3  test           dotnet test
+gate:2  build          dotnet build -warnaserror      (Roslyn + BannedApiAnalyzers, warnings = errors)
+gate:3  test           dotnet test                    (incl. NetArchTest layering guardrails)
 gate:4  vuln deps      dotnet list package --vulnerable
-gate:5  secrets        gitleaks (history + working tree)
-gate:6  shell lint     shellcheck -S info (hooks + bin)
-gate:7  no-suppress    grep meta-gate (#pragma warning disable / [SuppressMessage] + justify)
-gate:8  source-bans    grep meta-gate (Process.Start / Environment.Exit / unsafe)
-gate:9  doc-todos      grep meta-gate
-gate:10 coverage       dotnet test --collect "XPlat Code Coverage"  (line floor)   [FULL]
-gate:11 mutation       dotnet stryker  (MSI floor)                                  [FULL]
+gate:5  licenses       nuget-license  (SPDX allowlist; the cargo-deny licenses analogue)
+gate:6  secrets        gitleaks (history + working tree)
+gate:7  shell lint     shellcheck -S info (hooks + bin)
+gate:8  no-suppress    grep meta-gate (#pragma warning disable / [SuppressMessage] + justify)
+gate:9  source-bans    grep meta-gate (Process.Start / Environment.Exit / unsafe)
+gate:10 doc-todos      grep meta-gate
+gate:11 coverage       dotnet test --collect "XPlat Code Coverage"  (line floor)   [FULL]
+gate:12 mutation       dotnet stryker  (MSI floor)                                  [FULL]
 ```
 
 Static analysis is **on by default** (`EnableNETAnalyzers`, `AnalysisLevel=latest-recommended`
@@ -44,10 +45,12 @@ inner dev loop stays usable while `/commit` is strict. Rule severities tune in
 
 **No baselines. No suppressions. Source-fix only.** Any `#pragma warning disable`
 / `[SuppressMessage]` in game source (`src/`) must carry a real `//` justification
-(gate:7); a blanket disable (no warning code) is banned outright. Banned source
-primitives — process spawning, `Environment.Exit`/`FailFast`, `unsafe` without a
-`// SAFETY:` — fail gate:8. A skipped/`Skip=`'d test is a violation unless the
-spec's test plan records why and a follow-up exists.
+(gate:8); a blanket disable (no warning code) is banned outright. Banned source
+primitives — process spawning and `Environment.Exit`/`FailFast` — are refused at
+compile time by BannedApiAnalyzers (`BannedSymbols.txt`, under `-warnaserror`);
+that, plus `unsafe` without a `// SAFETY:`, is backstopped by the gate:9 grep. A
+skipped/`Skip=`'d test is a violation unless the spec's test plan records why and
+a follow-up exists.
 
 **Floors ratchet up, never down — and never below the §0 minimum.** The minimums
 (`NET_COV_MIN=80`, `MUT_MSI_MIN=80`) are baked into the gate; env may *raise* a
@@ -56,15 +59,16 @@ project's reach (actuals currently ~94% line coverage, ~84% mutation MSI) and
 ratchet toward parity with a mature codebase (94% / 100%) as the engine grows.
 Lowering a floor to pass is a charter violation — write the test.
 
-**Known scope (honest).** Coverage gate:10 is a *line* floor over the assemblies
+**Known scope (honest).** Coverage gate:11 is a *line* floor over the assemblies
 the tests load (the Engine). The MonoGame host (`RpgGame`) is the composition
 root — it owns the live loop with no unit-testable contract and is
 `[ExcludeFromCodeCoverage]` (the C# analogue of an excluded `main`); the testable
 world/entity/data logic it drives is covered in its own classes. The Player and
-Editor are thin hosts over the Engine. Mutation gate:11 runs Stryker over the
-Engine. Not yet gated: license/supply-chain policy beyond the vulnerable-package
-check, architecture-layering enforcement, and per-file coverage — the ratchet
-roadmap, recorded so the gap is explicit.
+Editor are thin hosts over the Engine. Mutation gate:12 runs Stryker over the
+Engine. License/supply-chain policy (gate:5, an SPDX allowlist) and
+architecture-layering enforcement (NetArchTest, asserted under gate:3) are now
+gated; per-file coverage remains a line-only floor — the next ratchet target,
+recorded so the gap stays explicit.
 
 The gate runs ALL steps and reports each; a single red step fails the gate.
 Every verdict is the tool's exit code, never a grep of its output. On a FULL
@@ -134,7 +138,7 @@ the code it writes. Tests are not optional and not skippable because a change
   guard helpers (`ArgumentOutOfRangeException.ThrowIf…`) for genuine precondition
   violations only. Public members carry XML doc comments.
 - Analyzer-clean under `-warnaserror`, `latest-recommended` (gate:2). A
-  suppression needs a trailing-comment justification (gate:7); prefer fixing the
+  suppression needs a trailing-comment justification (gate:8); prefer fixing the
   cause or tuning severity in `.editorconfig`.
 - Keep game logic in `MonoRpgMaker.Engine` (framework-thin) so console ports stay
   tractable. Separate simulation state from rendering. No hidden statics; no

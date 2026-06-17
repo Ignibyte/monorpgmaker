@@ -31,12 +31,19 @@ generator, NO Abstractions assembly, NO replay-hash gate):
 > decisions are designed against a known-good emit target. **MVP = the validated authoring loop, not
 > the chassis.**
 
-> **Status (2026-06-17):** the tracer slice is built (`Engine.Sim` + `Sim.Tracer` + the `RpgGame`
-> host) and green — 25/25 tests, `bin/gate.sh --fast` GREEN — via ticket #1 /
-> `WORK-m0-tracer-bullet-v1` (completed). It is the M1 extraction base. The **GO/NO-GO timing/feel
-> spike** (author the "chest gives one potion then empty" variant and time the AI-directed loop vs RPG
-> Maker's click-path; `dotnet run --project src/MonoRpgMaker.Player`) is the **pending manual step**
-> before committing to P0.
+> **Status (2026-06-17): GO.** The tracer slice is built (`Engine.Sim` + `Sim.Tracer` + the `RpgGame`
+> host), committed (`feat(m0)` 3655787, on the `build:` tooling commit), and **`bin/gate.sh` GREEN
+> [full]** — 32 tests, coverage 98.8%, mutation MSI 93.94% (ticket #1 done). The author ran the slice
+> (`dotnet run --project src/MonoRpgMaker.Player`) and judged the loop **good** — the make-or-break
+> thesis is **validated**. **P0 is greenlit:** build the chassis as an extraction from this slice.
+>
+> **Update (2026-06-17, ticket #2 — `WORK-m0-chest-give-once`):** the make-or-break task itself —
+> the "chest gives one potion, then empty" variant — is now authored as a second hand-written
+> authored-event exemplar (`Sim/Tracer/ChestEvent.cs`: give-once via a minimal `GameState` counter +
+> switch guard; visual open via a reused `DoorRule`). It **corroborates the GO** — `bin/gate.sh`
+> GREEN [full]: 40 tests, coverage 99.0%, mutation MSI 91.30%. A formal chest-vs-RPG-Maker stopwatch
+> was not run separately (the holistic GO on the tracer already greenlit P0); the procedure is in the
+> pipeline notes (`WORK-m0-chest-give-once.notes.md`) if a formal number is ever wanted.
 
 ## P0 — The chassis (extracted from the tracer) + by-construction scaffolding
 

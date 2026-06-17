@@ -47,24 +47,28 @@ recall from the forge first and capture lessons after.
 ## The gate — `bin/gate.sh` (binding: CONSTITUTION §0)
 
 The single source of truth for shippable. Strict, no baselines, source-fix only.
-**11 gates**:
+**12 gates**:
 
 ```
-1 format   2 build(-warnaserror)  3 test   4 vuln-deps  5 gitleaks
-6 shellcheck  7 no-suppressions  8 source-bans(SAST)  9 doc-todos
-[FULL] 10 coverage (coverlet line floor)   11 mutation (Stryker MSI)
+1 format   2 build(-warnaserror)  3 test   4 vuln-deps  5 licenses(SPDX allowlist)
+6 gitleaks  7 shellcheck  8 no-suppressions  9 source-bans(SAST)  10 doc-todos
+[FULL] 11 coverage (coverlet line floor)   12 mutation (Stryker MSI)
 ```
 
-- `bin/gate.sh` — FULL (all 11, incl. coverage + mutation). Required before `/commit`.
-- `bin/gate.sh --fast` — the 9 static gates, for a quick loop (`GATE GREEN [fast]`).
+- `bin/gate.sh` — FULL (all 12, incl. coverage + mutation). Required before `/commit`.
+- `bin/gate.sh --fast` — the 10 static gates, for a quick loop (`GATE GREEN [fast]`).
   Only a FULL green writes `.git/monorpgmaker-gate-receipt`, so `--fast` can't satisfy `/commit`.
 - Floors are baked-in minimums env can only raise: `NET_COV_MIN=80`,
   `MUT_MSI_MIN=80` (actuals ~94% / ~84%); they ratchet up over time.
 - On a FULL green the gate writes the receipt; `enforce-commit-gate.sh` blocks
   `git commit` of `.cs` unless that fingerprint matches the worktree.
 
-Tools: .NET 10 SDK; `dotnet tool install -g dotnet-stryker` (mutation); coverlet
-ships with the test project; `brew install gitleaks shellcheck`. Run the gate
+Tools: .NET 10 SDK (pinned in `global.json`); the CLI tools (Stryker, nuget-license,
+mgcb) are pinned in `.config/dotnet-tools.json` — `dotnet tool restore` provisions
+them; coverlet ships with the test project; `brew install gitleaks shellcheck`.
+Dependencies are pinned by committed `packages.lock.json` (the gate restores
+locked); the source-bans are enforced at compile time by BannedApiAnalyzers
+(`BannedSymbols.txt`) and architecture layering by NetArchTest. Run the gate
 before `/commit`; fix every red at source.
 
 ## The forge sidecar (knowledge + codegraph)
@@ -79,10 +83,29 @@ monorpgmaker is a tenant of the **shared oathstar-forge** sidecar
   `code-find`/`code-callers`/`code-callees` (the C# codegraph).
 - **IMPORTANT — pass `repo: "monorpgmaker"`** to the code tools. They default to
   the `oathstar` repo; without the arg you'll search the wrong project.
+- **`knowledge-search` / `docs-search` have NO project filter and bleed across
+  tenants** (verified: a `docs-search` returned oathstar's Datastar/Tauri/Rust
+  docs; `source_path` collides — both repos have `docs/technical-architecture.md`).
+  Knowledge hits are opaque UUIDs with no project/source attribution. Mitigate:
+  bias queries with monorpgmaker-distinct terms (MonoGame, C#, `MonoRpgMaker.*`,
+  `FixedPoint`, `IRandom`) and **discard any hit about Datastar / Tauri / Rust /
+  Axum / SSE-HTML / `oathstar-*` crates — that's the predecessor, not this repo.**
 - **Capture** at phase close: `aar-submit` (lessons), `failure-record`,
   `prevention-rule-record` / `architecture-decision-record`.
-- Tickets/sprints/bulletins are there too (`ticket-*`, `bulletin-list`), scoped
-  to monorpgmaker's project by the bearer.
+- Tickets/sprints/bulletins are there too (`ticket-*`, `sprint-*`,
+  `bulletin-list`). **The forge bearer now spans projects** (cross-project/admin
+  caller), so `ticket-list` / `ticket-next` return rows from *every* tenant — not
+  just this repo (verified: one `ticket-list` came back with both projects below).
+  Scope by **`project_id`** yourself:
+  - monorpgmaker (this repo — monogame/csharp) =
+    **`a9ee8162-3cfd-4c99-be5c-bbdb4be32b10`**
+  - oathstar (the predecessor — Rust/Tauri/Datastar web, *not* this repo) =
+    `faacfd78-05cb-4f17-804e-1daa709e5ed2`
+  - `ticket-create`: pass `project_id` = monorpgmaker's id explicitly (don't rely
+    on the default bound project). `ticket-list` / `ticket-next` take no project
+    filter — fetch, then keep only rows whose `project_id` matches monorpgmaker.
+    Prefer `ticket-get` by `id` (uuid) over `number`; the per-project `number` is
+    ambiguous under a cross-project bearer.
 
 The codegraph indexes the working tree in local mode, so a `git commit` here
 refreshes it within the poller interval (no manual reindex). `.mcp.json` is

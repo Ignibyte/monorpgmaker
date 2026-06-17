@@ -11,6 +11,28 @@ Decisions D-0015…D-0020 (2026-06-17, v2) HARDEN the design after an adversaria
 executable correctness contracts, the generator/validator split, additive seam kinds, and the
 open-source positioning) — see [agentic-substrate.md](agentic-substrate.md) and
 [agentic-strategy.md](agentic-strategy.md).
+Decision D-0021 (2026-06-17) sets the bundled-asset license policy.
+
+---
+
+## D-0021 — Bundled starter assets: curated LPC under OGA-BY/CC-BY; commercial games OK with attribution
+
+**Decision:** Ship a curated **Liberated Pixel Cup (LPC)** starter asset set as monorpgmaker's free
+cold-start bundle, licensed **OGA-BY 3.0 / CC-BY 3.0** (attribution-only). Prefer the OGA-BY subset
+(ElizaWy's "LPC Revised" + the Sharm/Redshrike OGA-BY assets) and **avoid the GPL-only and CC-BY-SA-only
+LPC assets**. Games built with the engine **and** the bundled art **may be commercial/paid — they owe
+only attribution**; the engine code stays MIT (code and art license *separately* — bundling CC-BY/OGA-BY
+art does not relicense the engine or the game). Automate attribution (generate a `CREDITS` from each
+asset's metadata + an editor credits panel). The free bundle is separate from any commercial asset packs
+an author uses for their own games.
+
+**Why:** The cold-start asset story is on the critical path (D-0020). OGA-BY 3.0 is CC-BY 3.0 with the
+anti-DRM / technical-measures clause removed → **console-safe**, decisive for the Switch/Xbox/PS target
+(D-0001), where plain CC-BY/CC-BY-SA's anti-DRM clause is hostile. Attribution-only (vs share-alike
+CC-BY-SA or copyleft GPL) lets authors **sell** their games — a stronger *and accurate* adoption pitch
+than "must be free." LPC's 32×32 tiles + 64×64 standard character frames fit the engine's tilemap +
+sprite model directly. (Not legal advice; verify per-asset and run a license review before a commercial
+launch.)
 
 ---
 

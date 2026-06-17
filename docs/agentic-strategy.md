@@ -42,8 +42,15 @@ why the build order now opens with a tracer bullet — see [roadmap.md](roadmap.
 - **One complete, gate-clean reference game** — small but real (a few maps, a battle, a quest). It is
   the worked example every shipped skill + scaffold fixture is *derived from*. Without it, the skills
   literally cannot exist.
-- **An explicit asset story** — bundle/curate CC0 / OpenGameArt tiles, sprites, and audio so a new
-  user has something to point the maps + database at on day one (RPG Maker's RTP is a real moat).
+- **An explicit asset story** — bundle a curated **LPC (Liberated Pixel Cup)** starter set under
+  **OGA-BY 3.0 / CC-BY 3.0** (attribution-only, *console-safe* — OGA-BY waives CC-BY's anti-DRM clause,
+  which matters for the Switch/Xbox/PS target). 32×32 tiles + 64×64 LPC-standard character frames map
+  straight onto the tilemap + entity sprite model. **Games using the bundle may be commercial/paid —
+  they owe only attribution** (avoid the GPL-only and CC-BY-SA-only assets to keep that clean); the
+  engine code stays MIT (code and art license separately). The attribution burden becomes a *feature*:
+  auto-generate a `CREDITS` from each asset's metadata + an editor credits panel (provenance by
+  construction, feeding the verifiable store). This free bundle is separate from any commercial asset
+  packs an author uses for their own games. See D-0021.
 - **A zero-AI default path** — the 90% case (a standard battle, stock effects/states/dialogue) is
   *configured*, not generated: directly-instantiable reference modules + data, no agent and no API
   budget required. The agent is for going *off* the rails, not for the common case.
