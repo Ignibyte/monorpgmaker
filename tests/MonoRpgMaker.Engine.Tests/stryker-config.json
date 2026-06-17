@@ -1,0 +1,16 @@
+{
+  "stryker-config": {
+    "project": "MonoRpgMaker.Engine.csproj",
+    "mutate": [
+      "!**/Sim/Tracer/*.cs"
+    ],
+    "reporters": [
+      "cleartext"
+    ],
+    "thresholds": {
+      "high": 90,
+      "low": 80,
+      "break": 0
+    }
+  }
+}

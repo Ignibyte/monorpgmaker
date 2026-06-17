@@ -2,35 +2,54 @@
   "version": 1,
   "isRoot": true,
   "tools": {
+    "dotnet-stryker": {
+      "version": "4.14.2",
+      "commands": [
+        "dotnet-stryker"
+      ],
+      "rollForward": false
+    },
+    "nuget-license": {
+      "version": "4.0.11",
+      "commands": [
+        "nuget-license"
+      ],
+      "rollForward": false
+    },
     "dotnet-mgcb": {
       "version": "3.8.4.1",
       "commands": [
         "mgcb"
-      ]
+      ],
+      "rollForward": false
     },
     "dotnet-mgcb-editor": {
       "version": "3.8.4.1",
       "commands": [
         "mgcb-editor"
-      ]
+      ],
+      "rollForward": false
     },
     "dotnet-mgcb-editor-linux": {
       "version": "3.8.4.1",
       "commands": [
         "mgcb-editor-linux"
-      ]
+      ],
+      "rollForward": false
     },
     "dotnet-mgcb-editor-windows": {
       "version": "3.8.4.1",
       "commands": [
         "mgcb-editor-windows"
-      ]
+      ],
+      "rollForward": false
     },
     "dotnet-mgcb-editor-mac": {
       "version": "3.8.4.1",
       "commands": [
         "mgcb-editor-mac"
-      ]
+      ],
+      "rollForward": false
     }
   }
 }

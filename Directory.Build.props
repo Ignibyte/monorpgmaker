@@ -16,5 +16,27 @@
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
+
+    <!--
+      Reproducible restores: every project emits a packages.lock.json pinning the
+      full transitive graph (the NuGet analogue of Cargo.lock). The gate restores
+      in locked mode, so a drifted graph fails the build instead of silently
+      resolving something new. Lock files are committed.
+    -->
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
+
+  <!--
+    First-class source bans (CONSTITUTION §14): BannedApiAnalyzers makes the
+    compiler refuse the symbols listed in BannedSymbols.txt (RS0030), enforced
+    under -warnaserror across every project. This is the primary enforcement;
+    the gate.sh grep meta-gate stays as a cheap backstop.
+  -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="3.3.4">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt" />
+  </ItemGroup>
 </Project>

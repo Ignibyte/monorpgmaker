@@ -1,0 +1,11 @@
+# Banned APIs — enforced by Microsoft.CodeAnalysis.BannedApiAnalyzers (RS0030)
+# at build time under -warnaserror, across every project. This is the first-class
+# replacement for the gate.sh grep-based source-ban meta-gate (CONSTITUTION §14):
+# the compiler now refuses these symbols, so they cannot slip in via formatting.
+#
+# Format: one documentation-comment ID per line, optional "; message" suffix.
+
+T:System.Diagnostics.Process; Subprocess execution has no place in engine/game logic (CONSTITUTION §14). If a host ever needs it, isolate it behind an injected abstraction in the Player/Editor host, not the Engine.
+M:System.Environment.Exit(System.Int32); Hard process exit is banned (CONSTITUTION §14) — return a typed result or throw to the host; never kill the process from game logic.
+M:System.Environment.FailFast(System.String); FailFast is banned (CONSTITUTION §14) — surface failures as typed results/exceptions instead.
+M:System.Environment.FailFast(System.String,System.Exception); FailFast is banned (CONSTITUTION §14) — surface failures as typed results/exceptions instead.
