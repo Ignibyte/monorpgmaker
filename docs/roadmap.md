@@ -47,6 +47,15 @@ generator, NO Abstractions assembly, NO replay-hash gate):
 
 ## P0 — The chassis (extracted from the tracer) + by-construction scaffolding
 
+> **Status (2026-06-17): slice 1 of N landed** — `MonoRpgMaker.Abstractions` + the
+> `FixedPoint` (Q16.16) integer-backed primitive (ticket #3 / `WORK-p0-abstractions-fixedpoint`).
+> `bin/gate.sh` GREEN [full]: coverage 99.1%, mutation MSI Engine 91.30% / Abstractions 82.46%.
+> The mutation gate now floors MSI on **every** production project (Engine + Abstractions), and the
+> NetArchTest "Project → Abstractions only" ring is live. **Remaining P0 slices:** the sim
+> float/`MathF`/`Vector2`/`foreach`-over-`Dictionary` ban analyzer (+ its sim/host scoping), the
+> `IRandom`/`IDeterministicRng` seam + a deterministic RNG, extracting the event seam interfaces
+> into Abstractions, and the generator/validator/scaffolding below.
+
 - `MonoRpgMaker.Abstractions`; the **`FixedPoint` (Q16.16)** primitive as the *only* sim numeric type.
 - **Generator/validator split:** a Roslyn generator that does ONLY dumb, syntax-keyed emit and ALWAYS
   emits a compilable (degraded) composition; a separate `monorpg validate` step (over metadata) does

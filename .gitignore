@@ -1,5 +1,8 @@
-# Build output
-bin/
+# Build output. `bin/` is scoped to the project dirs so the hand-written quality
+# gate at the repo root (bin/gate.sh) stays version-controlled — a bare `bin/`
+# silently ignored it.
+src/**/bin/
+tests/**/bin/
 obj/
 artifacts/
 *.user

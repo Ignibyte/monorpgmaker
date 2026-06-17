@@ -1,3 +1,4 @@
+using MonoRpgMaker.Abstractions;
 using MonoRpgMaker.Engine.World;
 using NetArchTest.Rules;
 
@@ -46,6 +47,27 @@ public sealed class ArchitectureTests
         Assert.True(
             result.IsSuccessful,
             FailureMessage("simulation namespaces must not depend on Microsoft.Xna.Framework.Graphics", result));
+    }
+
+    [Fact]
+    public void Abstractions_must_not_depend_on_MonoGame_Engine_or_hosts()
+    {
+        // The published seam surface (MonoRpgMaker.Abstractions) is pure: it must not
+        // reach down into MonoGame, the Engine, or the hosts — the "Project →
+        // Abstractions only" ring (D-0014). The agent-authored project layer programs
+        // against this assembly, so it stays dependency-free.
+        var result = Types.InAssembly(typeof(FixedPoint).Assembly)
+            .Should()
+            .NotHaveDependencyOnAny(
+                "Microsoft.Xna.Framework",
+                "MonoRpgMaker.Engine",
+                "MonoRpgMaker.Player",
+                "MonoRpgMaker.Editor")
+            .GetResult();
+
+        Assert.True(
+            result.IsSuccessful,
+            FailureMessage("MonoRpgMaker.Abstractions must stay pure (no MonoGame / Engine / host dependency)", result));
     }
 
     private static string FailureMessage(string rule, TestResult result)

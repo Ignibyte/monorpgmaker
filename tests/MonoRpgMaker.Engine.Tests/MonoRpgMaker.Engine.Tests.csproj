@@ -23,6 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\MonoRpgMaker.Abstractions\MonoRpgMaker.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\MonoRpgMaker.Engine\MonoRpgMaker.Engine.csproj" />
   </ItemGroup>
 
