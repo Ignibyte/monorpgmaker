@@ -5,7 +5,7 @@
 - **Language:** C# (`net10.0`).
 - **Engine:** [MonoGame](https://monogame.net) `3.8.*` (DesktopGL back-end today).
 - **Tests:** xUnit + coverlet.
-- **Tooling sidecar:** `oathstar-forge` (Rust MCP service) for codegraph,
+- **Tooling sidecar:** `ignibyte-forge` (Rust MCP service) for codegraph,
   doc search, knowledge capture, and the ticket/sprint work pipeline.
 
 ## Solution layout
@@ -46,8 +46,8 @@ registered developer programs. Keeping all game logic in `MonoRpgMaker.Engine`
 
 ## The forge sidecar
 
-`../oathstar-forge` is a loopback Rust MCP service (`http://127.0.0.1:8080/mcp/forge`)
-shared with the Oathstar project. monorpgmaker is registered as its own
+`ignibyte-forge` is a loopback Rust MCP service (`http://127.0.0.1:8080/mcp/forge`)
+shared across local projects. monorpgmaker is registered as its own
 *project* + *repo* there, so its tickets, knowledge, and codegraph are isolated
 by tenant. It provides:
 

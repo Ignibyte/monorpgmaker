@@ -6,7 +6,7 @@ useDefault = true
 
 [[rules]]
 id = "forge-bearer"
-description = "Forge API bearer token (oathstar-forge)"
+description = "Forge API bearer token (ignibyte-forge)"
 regex = '''forge_pk_[A-Za-z0-9]{20,}'''
 
 [[rules]]

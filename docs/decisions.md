@@ -309,7 +309,7 @@ layer. Field-level JSON schema parity is an open question (see feature-research.
 
 ## D-0004 — Forge codegraph gets a C# extractor
 
-**Decision:** Add a C# tree-sitter extractor to `oathstar-forge`'s
+**Decision:** Add a C# tree-sitter extractor to `ignibyte-forge`'s
 `forge-codeindex` (alongside the existing Rust + JS ones) so `code-find` /
 `code-callers` work on the monorpgmaker source.
 
@@ -322,7 +322,7 @@ this project.
 ## D-0003 — Share the existing forge instance (multi-tenant)
 
 **Decision:** Register monorpgmaker as its own *project* + *repo* in the running
-`oathstar-forge` instance rather than standing up a dedicated clone.
+`ignibyte-forge` instance rather than standing up a dedicated clone.
 
 **Why:** The forge is multi-tenant by design (`project_id` on tickets/knowledge/
 code, multi-row `doc_sources`/`code_repos`). A dedicated key scopes our tickets

@@ -19,7 +19,7 @@ Run these; fix any failure before proceeding.
 ```bash
 # forge sidecar configured + reachable
 test -f .mcp.json && jq -r '.mcpServers.forge.url // empty' .mcp.json
-curl -fsS http://127.0.0.1:8080/health >/dev/null 2>&1 && echo "forge: up" || echo "forge: DOWN — run ../oathstar-forge/scripts/start-all.sh"
+curl -fsS http://127.0.0.1:8080/health >/dev/null 2>&1 && echo "forge: up" || echo "forge: DOWN — launchctl kickstart -k gui/\$(id -u)/com.chadpeppers.forge-mcp"
 
 # toolchain
 echo "dotnet: $(dotnet --version 2>/dev/null || echo MISSING)"
@@ -33,7 +33,7 @@ jq -r '.hooks.PreToolUse, .hooks.Stop' .claude/settings.json >/dev/null && echo 
 ls docs/planning/pipeline/active/*.spec.md 2>/dev/null
 ```
 
-If `forge: DOWN`, tell the user to start the sidecar (`../oathstar-forge/scripts/start-all.sh`) before pipeline work — the gates and recall depend on it.
+If `forge: DOWN`, tell the user to restart the forge service (`launchctl kickstart -k gui/$(id -u)/com.chadpeppers.forge-mcp`) before pipeline work — the gates and recall depend on it.
 
 If an active pipeline doc exists, present it and ask: resume that pipeline, or archive it and start new? (Never run two at once — §3.)
 

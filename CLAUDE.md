@@ -73,10 +73,12 @@ before `/commit`; fix every red at source.
 
 ## The forge sidecar (knowledge + codegraph)
 
-monorpgmaker is a tenant of the **shared oathstar-forge** sidecar
-(`../oathstar-forge`), an MCP service registered as `forge` in `.mcp.json`
-(tools appear as `mcp__forge__*`). Start it with
-`../oathstar-forge/scripts/start-all.sh`.
+monorpgmaker is a tenant of the **shared forge** sidecar
+([`ignibyte-forge`](https://github.com/Ignibyte/ignibyte-forge)), a local
+loopback MCP service at `http://127.0.0.1:8080/mcp/forge`, registered as `forge`
+in `.mcp.json` (tools appear as `mcp__forge__*`). On this machine it runs
+always-on; if `localhost:8080/health` is down, restart it with
+`launchctl kickstart -k gui/$(id -u)/com.chadpeppers.forge-mcp`.
 
 - **Recall** before planning/coding: `knowledge-search`, `knowledge-context`
   (lessons/failures/prevention rules), `docs-search` (design docs),

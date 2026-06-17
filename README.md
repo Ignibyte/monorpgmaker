@@ -38,14 +38,14 @@ Targets `net10.0`. The Player uses the MonoGame Content Pipeline (MGCB).
 
 ## Tooling — the forge sidecar
 
-This repo is wired to **oathstar-forge** (`../oathstar-forge`), a local Rust
-MCP sidecar that gives Claude Code agents:
+This repo is wired to **[ignibyte-forge](https://github.com/Ignibyte/ignibyte-forge)**,
+a local Rust MCP sidecar that gives Claude Code agents:
 
 - a **codegraph** over the C# source (`code-find`, `code-callers`, `code-callees`),
 - **semantic search** over these design docs (`docs-search`),
 - a **knowledge store** (lessons / failures / decisions) and a **ticket/sprint
   backlog** for the work pipeline.
 
-Start it with `../oathstar-forge/scripts/start-all.sh`; the tools appear in
-Claude Code as `mcp__forge__*` once `.mcp.json` is in place (copy it from
-`.mcp.json.example`). See `docs/technical-architecture.md`.
+It runs as a loopback MCP service at `http://127.0.0.1:8080/mcp/forge`; the tools
+appear in Claude Code as `mcp__forge__*` once `.mcp.json` is in place (copy it
+from `.mcp.json.example`). See `docs/technical-architecture.md`.

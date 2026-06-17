@@ -9,7 +9,7 @@ monorpgmaker is a remake of the RPG Maker authoring tool + runtime on
 [MonoGame](https://monogame.net): a C# engine (`src/MonoRpgMaker.Engine`), a
 desktop player (`src/MonoRpgMaker.Player`), the maker/editor
 (`src/MonoRpgMaker.Editor`), and xUnit tests (`tests/`). It is paired with the
-**oathstar-forge** knowledge sidecar (MCP server `forge` in `.mcp.json`) — the
+**ignibyte-forge** knowledge sidecar (MCP server `forge` in `.mcp.json`) — the
 pipeline records what it learns there and recalls it on the next run. The whole
 point of the MonoGame rebuild is **console reach** (§ docs/technical-architecture.md).
 
@@ -209,7 +209,7 @@ instance (paired with the Oathstar project); monorpgmaker is its own *project*
 + *repo* tenant there, so its tickets, knowledge, and codegraph are isolated by
 the bearer in `.mcp.json`. Capture to it, recall from it. `.mcp.json` is
 owner-managed (gitignored — it holds the bearer); the `forge` server points at
-the local sidecar (`../oathstar-forge/scripts/start-all.sh`).
+the local loopback service `http://127.0.0.1:8080/mcp/forge` (ignibyte-forge).
 
 ---
 
