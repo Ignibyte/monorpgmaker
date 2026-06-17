@@ -1,96 +1,121 @@
 # Roadmap
 
-The adopted phased plan, grounded in [feature-research.md](feature-research.md)
-(verified RPG Maker MV/MZ + MonoGame research). Each phase ends with something
-runnable and tested. Phase order front-loads the load-bearing, hardest-to-retrofit
-foundations (data format, runtime core, the scene-graph layer MonoGame lacks) and
-defers large-but-additive systems (battle, menus, the editor GUI).
+**Revised 2026-06-17 (v2) — reordered after the adversarial review.** The thesis is tested FIRST with
+a hand-wired tracer bullet; the chassis is built as an *extraction* from it; and the determinism +
+by-construction-scaffolding guarantees are locked before any sim module. See
+[agentic-substrate.md](agentic-substrate.md), [agentic-features.md](agentic-features.md), and
+[agentic-strategy.md](agentic-strategy.md). The prior data / scene-graph / render foundations are
+folded into the phases, not dropped.
 
 ## Where we are (done)
 
-- Scaffold: `Engine` (`World` tiles/maps/direction, `Entities` movable actors,
-  `Data` id-keyed `Database<T>`, `Core` `RpgGame` host), `Player`, `Editor`
-  (headless logic), xUnit tests. Builds clean; `bin/gate.sh` green; forge codegraph
-  + pipeline live. This is the seed `World`/`Entities`/`Data` layer the phases below
-  grow into the six-module runtime.
+- Scaffold: `Engine` (`World` tiles/maps/direction, `Entities` movable actors, `Data` id-keyed
+  `Database<T>`, `Core` `RpgGame` host), `Player`, `Editor` (headless logic), xUnit tests. Builds
+  clean; `bin/gate.sh` green; forge codegraph + pipeline live.
 
-## P0 — Content & save format (foundation; build first)
+## P-(-1) — Tracer bullet: prove the thesis FIRST
 
-The data format is a dependency of everything. Establish the **read-only `$data`**
-vs **serialized `$game` save** split before building systems on top.
+A hand-wired vertical slice under a RELAXED **prototype gate** (format + build + source-bans only — NO
+generator, NO Abstractions assembly, NO replay-hash gate):
 
-- A JSON content format + loader: maps (`Map###.json`), database tables
-  (Actors/Items/Skills/Enemies/Troops/…), `System.json`, `CommonEvents.json`.
-- A project/resource manifest (global config split from a resource registry).
-- Save serialization of `$game` state (compression optional).
-- *Decide first:* target RPG Maker compatibility level (informed parity vs exact
-  schema) — see decisions.md / open question on field-level schemas.
+- A painted map + move/collide + ONE authored event (walk-on → message → set switch → open door) as
+  plain C# against minimal interfaces; determinism via injected `IRandom` only.
+- **The make-or-break spike:** time the "chest gives one potion, then is empty" task through the
+  AI-directed loop vs. RPG Maker's click-path. If it isn't within ~3× and doesn't *feel* good for the
+  technical-hobbyist user, the thesis is falsified here — cheaply, at week ~3, not on top of a
+  six-month toolchain.
+- Yields the demo + contributor on-ramp, AND the **first gate-clean feature** the golden
+  patterns / skills / fixtures are derived from.
 
-## P1 — Runtime core
+> Then build P0/P1 as an EXTRACTION / refactor of this working slice, so the generator and the locked
+> decisions are designed against a known-good emit target. **MVP = the validated authoring loop, not
+> the chassis.**
 
-- Six-module skeleton (core / managers / objects / scenes / sprites / windows).
-- **Scene-graph / transform-hierarchy layer** (MonoGame has none — cascading
-  coordinates + visibility for tilemap/sprites/windows). Choose: custom
-  Pixi.Container-equivalent vs MonoGame.Extended vs a scene-graph lib.
-- Graphics/Bitmap/Sprite/Window equivalents over `SpriteBatch`/`Texture2D`.
-- `Input` mapper: keyboard + `gamepadMapper` → logical actions, `dir4`/`dir8`.
+## P0 — The chassis (extracted from the tracer) + by-construction scaffolding
 
-## P2 — Tilemap render + character movement (MVP map walkthrough)
+- `MonoRpgMaker.Abstractions`; the **`FixedPoint` (Q16.16)** primitive as the *only* sim numeric type.
+- **Generator/validator split:** a Roslyn generator that does ONLY dumb, syntax-keyed emit and ALWAYS
+  emits a compilable (degraded) composition; a separate `monorpg validate` step (over metadata) does
+  DAG validation + topo-sort + `contract-manifest.json`, surfacing structured `MRM0001..` errors
+  *before* the C# compile. The manifest is the source of truth; a non-generator fallback wiring path is
+  first-class and gate-diffed. A measured **<1s incremental edit budget** is a gate.
+- **By-construction scaffolding (the aic guarantee-A leverage):** `monorpg scaffold <kind>` = a
+  deterministic `{{var}}` emitter mirroring a committed **gate-clean fixture** per seam-kind
+  (signatures return the outcome vocabulary so raw state mutation won't type-check; `FixedPoint`/
+  `IRandom` wired; a co-located seeded test). Fixtures run as goldens; templates are CI-diffed against
+  them; the agent fills only the `// fill:` holes.
+- Analyzers: outcome-return purity + the float / `MathF` / `Vector2` / `foreach`-over-`Dictionary` ban
+  in sim code (alongside the existing `System.Random` / `DateTime` ban). NetArchTest Project →
+  Abstractions only.
 
-- Tilemap renderer: int-ID grid (`int[]`) + tileset atlas slicing
-  (`id = row*Columns + col`); layers; autotile animation; optional looping.
-- Character sprite movement + walk animation + tile collision (extends the
-  current `Entity`/`TileMap`).
-- Camera.
+## P1 — Determinism + state spine (+ content/data format)
 
-## P3 — Event interpreter + message system
+- `IRandom` / `IDeterministicRng`; fixed-step sim loop + strict sim/render split.
+- **Lock the coroutine mechanism = `IEnumerator`-yield / source-generated state machine** (no Task /
+  async-await in sim flow — analyzer-enforced).
+- The `$data` content format + loader + project/resource manifest.
+- `ISaveStateComponent` + versioned state + migration; built-in `$game` components; `RngState`.
+- The replay harness wired into the gate — run on **NativeAOT + a second CPU arch (ARM64 + x64)** so
+  replay-to-same-hash is portable by construction, not a localhost illusion.
 
-- Event objects on maps (pages, conditions, triggers).
-- Interpreter as a **command-code → handler** dispatch (1:1 with the editor's
-  palette). MVP commands: Show Text `101`, Show Choices `102`, Conditional Branch
-  `111`, Transfer Player `201`, Set Movement Route `205`; then Common Events.
-- Message/dialogue window.
+## P2 — Effect spine + spatial sim (+ scene-graph & tilemap)
 
-> **MVP slice = P0–P3**: JSON map → render → move/collide → minimal interpreter →
-> message window → save/load. Prove the end-to-end pipeline here.
+- `IEffect` / `ITrait` / `IDamageFormula` / `IStateBehavior` + registry + the **shared outcome
+  vocabulary** (also the type used by `.expect` rows and scaffold-emitted return signatures) +
+  `TraitDomain` fold rules; `StandardDamageFormula` (coefficients as pure data — the zero-AI path).
+- The **author-stat + formula-engine** pattern: author formula text → the agent *compiles* it to a
+  deterministic `IDamageFormula` module (RPG Architect's feel, AOT-safe).
+- Movement (`MovementTick`, `IPassability`, `IPathfinder`, `MoveCommand`, `IMoveBehavior`, vehicles);
+  maps (`IMapContext`, lifecycle, cell-transition, region/zone triggers via **LDtk-style typed enums**,
+  encounters, atmosphere; **the persistent-spatial-state seam**); the scene-graph + tilemap renderer.
 
-## P4 — Menus + save/load UI
+## P3 — Events keystone + dialogue + presentation
 
-- Menu system (`Window_*` widgets, scene stack).
-- Save/load UI over the P0 serialization.
+- `IEventBehavior` coroutines as **typed callable units** (`ctx.Call(behaviorId, args) → outcome`,
+  GB-Studio-style), `EventContext` semantic verbs, the trigger/page model with **Tiled-template stable
+  GUID identity**, the `GameState` flag store + `FlagsGen`.
+- Dialogue over the same coroutine model; `TextPipeline`; `ITextCode`; `ILocalization`.
+- Presentation: `IPresentation` + `PresentationEvent` stream + `IPresenter` / `NullPresenter`; the
+  **presenter-extension seam** (`IPresentationLayer`) so new visual layers are additive.
+- **Bring the inspector forward:** the replay scrubber + module-DAG view land here as dev tools, not at
+  P5.
 
-## P5 — Battle + extensibility
+> **The reference game** takes shape across P2–P3 — the gate-clean worked example the skills/fixtures
+> are derived from (cold-start, see [agentic-strategy.md](agentic-strategy.md)).
 
-- Default **turn-based battle behind a swappable interface** (BattleManager /
-  Scene_Battle / Game_Action / Game_Battler; define the minimal swap boundary).
-- **Typed C# plugin/command registry** — the power-user escape hatch beside the
-  visual event system (the model MZ/Bakin/Solarus converge on).
+## P4 — Battle (flagship swap) + runtime UI
 
-## P6 — The editor (the maker)
+- `IBattleSystem` + serializable `BattleState` + `BattleEvent` stream; the default
+  `TurnBasedBattleSystem` of swappable, **layerable** peers; consumes the P2 effect registry.
+- Prove RPG Architect's **battle-mode matrix** (turn-based / ATB-cooldown / on-map) reachable by seam
+  swaps over one `BattleState` BEFORE locking battle contracts.
+- Menus/windows via the **Data Sources** binding model; scene stack; `UiRegistry`; `InputActionMap`
+  (record a **sub-tick offset** in the `InputFrame` so rhythm-style timing stays replayable).
 
-Built against the working runtime, consuming the same `$data` JSON (no throwaway
-editor). The three pillars:
-- **Map editor** — tile palette, layers, autotiles (Wang-style), regions, per-tile
-  collision (TMX is the reference model).
-- **Database editor** — the ~16 category tables (Actors, Classes, Skills, Items,
-  Weapons, Armor, Enemies, Troops, States, Animations, Tilesets, Common Events,
-  System 1/2, Types, Terms).
-- **Event editor** — the 3-tab / ~100-command palette + event pages.
-- Project management + playtest launch.
-- GUI front-end (Avalonia or MonoGame) over the headless `Editor` logic.
+## P5 — Full inspector / steering + console-readiness
 
-## P7+ — Console porting
+- The complete editor inspector (per-area scrubbers, save inspector, live `[ModuleParam]` tweak); the
+  **agent capability benchmark** as a published deliverable.
+- AOT/trimming pass; the reflection-ban carve-outs (save-migration reader, content pipeline, STJ source
+  generator) proven not to re-enter the sim; final console-determinism review.
 
-- Validate the Engine against MonoGame console back-ends (registered-developer
-  programs / NDA'd SDKs).
-- Input remap via the `gamepadMapper`; per-platform storage/save APIs; content
-  pipeline; certification (TRC/TCR/lotcheck). **Under-researched — needs
-  platform-holder investigation** (see feature-research.md caveats).
+## The visual editor track (maps, database, Modules panel)
+
+The map editor (TMX/Wang, regions, named zones, collision) and database editor (the ~16 category grids)
+are built against the `$data` schemas as they land (P1–P2), reusing the same JSON the runtime consumes.
+The **Modules panel** (the honest successor to MZ's Plugin Manager — a cycle is a red build, not a
+silent runtime break) plus the inspector (brought forward to P3) complete the GUI. The old "event
+editor" pillar is **replaced** by agentic authoring (D-0011).
 
 ## Cross-cutting
 
-- Keep all game logic in `MonoRpgMaker.Engine` (framework-thin) so console ports
-  stay tractable; keep simulation state separate from rendering; keep simulation
-  deterministic (inject RNG).
-- Every non-trivial slice flows through the pipeline (`/work` → … → `/commit`);
-  capture lessons + decisions to the forge.
+- All game logic in `MonoRpgMaker.Engine` (framework-thin); sim deterministic (injected `IRandom`,
+  `FixedPoint`) and separate from rendering. Authors extend only through `MonoRpgMaker.Abstractions`
+  seams; wiring is compile-time, never runtime reflection (scoped to the sim path — D-0021).
+- Source of truth = **code-is-truth after first emit**; `intent.md` is a scaffold seed + changelog;
+  re-steering is a localized reviewed edit, not a stochastic rewrite (D-0013, amended).
+- A module is "done" only when its `.cs`, `$data`, `.expect` rows, and a seeded replay test pass
+  `bin/gate.sh`. The product ships this as a scoped `plan → scaffold → author → inspect → gate`
+  pipeline.
+- Open-source under **MIT** + a no-rug-pull pledge; BYO-API-key; capture lessons + decisions to the
+  forge.
