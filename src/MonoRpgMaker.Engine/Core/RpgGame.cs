@@ -87,6 +87,8 @@ public class RpgGame : Game
         2 => Color.Goldenrod,         // lever
         3 => new Color(150, 40, 40),  // door closed
         4 => new Color(60, 140, 70),  // door open
+        5 => new Color(150, 110, 40), // chest closed
+        6 => new Color(90, 80, 55),   // chest open (emptied)
         _ => Color.Black,
     };
 

@@ -165,3 +165,129 @@ public class SimGuardTests
         Assert.True(state.Get("k"));
     }
 }
+
+public class TracerChestTests
+{
+    // A minimal 3x3 room with the player one tile west of a chest at (2,1).
+    private static WorldSim ChestSim() =>
+        new(new TileMap(3, 3), new Actor("Hero", new Point(1, 1), maxHp: 10),
+            new IMapEvent[] { new ChestEvent(new Point(2, 1)) }, Array.Empty<DoorRule>());
+
+    [Fact] // CT1 — REQ-001
+    public void Chest_FirstStepOn_GrantsOnePotion_AndShowsTakeMessage()
+    {
+        var sim = ChestSim();
+
+        Assert.True(sim.MovePlayer(Direction.Right));   // (1,1) -> (2,1) the chest
+
+        Assert.Equal(1, sim.State.GetCount(ChestEvent.PotionCount));
+        Assert.True(sim.State.Get(ChestEvent.OpenedSwitch));
+        Assert.Equal("You open the chest and take a potion.", sim.CurrentMessage);
+    }
+
+    [Fact] // CT2 — REQ-002 (granted once; empty thereafter)
+    public void Chest_SteppedOnRepeatedly_ShowsEmpty_AndTallyStaysOne()
+    {
+        var sim = ChestSim();
+
+        Assert.True(sim.MovePlayer(Direction.Right));    // onto chest: take
+        Assert.Equal("You open the chest and take a potion.", sim.CurrentMessage);
+
+        Assert.True(sim.MovePlayer(Direction.Left));     // step off: message clears
+        Assert.Null(sim.CurrentMessage);
+
+        Assert.True(sim.MovePlayer(Direction.Right));    // back onto chest: empty
+        Assert.Equal("The chest is empty.", sim.CurrentMessage);
+
+        Assert.True(sim.MovePlayer(Direction.Left));
+        Assert.True(sim.MovePlayer(Direction.Right));    // a third visit: still empty
+        Assert.Equal("The chest is empty.", sim.CurrentMessage);
+
+        Assert.Equal(1, sim.State.GetCount(ChestEvent.PotionCount));   // exactly one, ever
+    }
+
+    [Fact] // CT3 — REQ-003 (determinism)
+    public void Chest_SameCommandSequence_OnTwoFreshSims_IdenticalOutcome()
+    {
+        var commands = new[] { Direction.Right, Direction.Left, Direction.Right };
+
+        var first = Run(commands);
+        var second = Run(commands);
+
+        Assert.Equal(first.tally, second.tally);
+        Assert.Equal(first.messages, second.messages);
+
+        static (int tally, string?[] messages) Run(Direction[] cmds)
+        {
+            var sim = ChestSim();
+            var messages = new string?[cmds.Length];
+            for (var i = 0; i < cmds.Length; i++)
+            {
+                sim.MovePlayer(cmds[i]);
+                messages[i] = sim.CurrentMessage;
+            }
+
+            return (sim.State.GetCount(ChestEvent.PotionCount), messages);
+        }
+    }
+
+    [Fact] // CT4 — REQ-004 (placed + wired into the Player-booted scene, and reachable)
+    public void TracerRoom_Chest_IsPlacedWired_AndGrantsWhenReached()
+    {
+        var sim = TracerRoom.Build();
+        var chestCell = new Point(11, 4);
+
+        Assert.Equal(TracerRoom.ChestClosed, sim.Map.GetTile(chestCell));   // closed at start
+
+        // Pull the lever (which opens the door), then walk the row to the chest.
+        for (var step = 0; step < 9; step++)
+            Assert.True(sim.MovePlayer(Direction.Right));
+
+        Assert.Equal(chestCell, sim.Player.Cell);                            // reached it
+        Assert.Equal(1, sim.State.GetCount(ChestEvent.PotionCount));         // it granted
+        Assert.Equal("You open the chest and take a potion.", sim.CurrentMessage);
+        Assert.Equal(TracerRoom.ChestOpen, sim.Map.GetTile(chestCell));      // and visually opened
+    }
+}
+
+public class GameStateCounterTests
+{
+    [Fact] // GS1
+    public void GetCount_UnsetKey_IsZero()
+    {
+        var state = new GameState();
+
+        Assert.Equal(0, state.GetCount("potions"));
+    }
+
+    [Fact] // GS2 — accumulation (kills the +/amount mutants)
+    public void Add_AccumulatesCount()
+    {
+        var state = new GameState();
+
+        state.Add("potions", 1);
+        Assert.Equal(1, state.GetCount("potions"));
+
+        state.Add("potions", 1);
+        Assert.Equal(2, state.GetCount("potions"));
+
+        state.Add("potions", 3);
+        Assert.Equal(5, state.GetCount("potions"));
+    }
+
+    [Fact] // GS3 — write-path guard
+    public void Add_NullKey_Throws()
+    {
+        var state = new GameState();
+
+        Assert.Throws<ArgumentNullException>(() => state.Add(null!, 1));
+    }
+
+    [Fact] // GS3 — read-path guard
+    public void GetCount_NullKey_Throws()
+    {
+        var state = new GameState();
+
+        Assert.Throws<ArgumentNullException>(() => state.GetCount(null!));
+    }
+}

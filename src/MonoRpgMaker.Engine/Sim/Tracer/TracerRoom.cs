@@ -26,6 +26,12 @@ public static class TracerRoom
     /// <summary>The open (passable) door.</summary>
     public static readonly Tile DoorOpen = new(TilesetId: 4, Blocking: false);
 
+    /// <summary>The closed chest the player steps onto to open.</summary>
+    public static readonly Tile ChestClosed = new(TilesetId: 5, Blocking: false);
+
+    /// <summary>The opened, emptied chest.</summary>
+    public static readonly Tile ChestOpen = new(TilesetId: 6, Blocking: false);
+
     /// <summary>Assemble the configured simulation for the tracer slice.</summary>
     public static WorldSim Build()
     {
@@ -54,11 +60,18 @@ public static class TracerRoom
 
         var leverCell = new Point(4, doorRow);
         var doorCell = new Point(wallX, doorRow);
+        // The chest sits beyond the door on the same row. Like the door cell, it is
+        // owned by its DoorRule (SyncDoors paints it closed first), so no SetTile here.
+        var chestCell = new Point(11, doorRow);
         map.SetTile(leverCell, Lever);
 
         var player = new Actor("Hero", new Point(2, doorRow), maxHp: 30);
-        var events = new IMapEvent[] { new LeverEvent(leverCell) };
-        var doors = new[] { new DoorRule(doorCell, LeverEvent.DoorSwitch, DoorClosed, DoorOpen) };
+        var events = new IMapEvent[] { new LeverEvent(leverCell), new ChestEvent(chestCell) };
+        var doors = new[]
+        {
+            new DoorRule(doorCell, LeverEvent.DoorSwitch, DoorClosed, DoorOpen),
+            new DoorRule(chestCell, ChestEvent.OpenedSwitch, ChestClosed, ChestOpen),
+        };
 
         return new WorldSim(map, player, events, doors);
     }
