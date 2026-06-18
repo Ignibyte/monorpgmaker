@@ -1,13 +1,14 @@
+using System.Collections.Generic;
 using MonoRpgMaker.Abstractions;
 
 namespace MonoRpgMaker.Engine.Sim.Tracer;
 
 /// <summary>
-/// The hand-authored M0 chest event: the first time the player steps onto the chest
-/// it grants one potion (a <see cref="GameState"/> counter), narrates the take, and
-/// latches the <see cref="OpenedSwitch"/>; every later step finds it empty. The
-/// give-once variant of <see cref="LeverEvent"/> — the same "check a flag, change
-/// state, narrate" target shape the scaffolder will later emit.
+/// The hand-authored M0 chest event: the first time the player steps onto the chest it grants one
+/// potion (an <see cref="AddCounter"/> outcome), narrates the take, and latches the
+/// <see cref="OpenedSwitch"/>; every later step <em>returns</em> only the "empty" message. The
+/// give-once variant of <see cref="LeverEvent"/> — the same "read a flag, RETURN effects" target
+/// shape the scaffolder will later emit.
 /// </summary>
 public sealed class ChestEvent : IMapEvent
 {
@@ -27,16 +28,18 @@ public sealed class ChestEvent : IMapEvent
     public EventTrigger Trigger => EventTrigger.StepOn;
 
     /// <inheritdoc />
-    public void Run(IEventContext context)
+    public IReadOnlyList<Outcome> Run(IEventContext context)
     {
         if (context.GetSwitch(OpenedSwitch))
         {
-            context.ShowMessage("The chest is empty.");
-            return;
+            return [new ShowMessage("The chest is empty.")];
         }
 
-        context.AddCounter(PotionCount, 1);
-        context.SetSwitch(OpenedSwitch, true);
-        context.ShowMessage("You open the chest and take a potion.");
+        return
+        [
+            new AddCounter(PotionCount, 1),
+            new SetSwitch(OpenedSwitch, true),
+            new ShowMessage("You open the chest and take a potion."),
+        ];
     }
 }

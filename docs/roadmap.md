@@ -47,7 +47,7 @@ generator, NO Abstractions assembly, NO replay-hash gate):
 
 ## P0 — The chassis (extracted from the tracer) + by-construction scaffolding
 
-> **Status (2026-06-18): slices 1–3 + 3b + the sim-determinism analyzer landed** —
+> **Status (2026-06-18): slices 1–3 + 3b + the sim-determinism analyzer + the shared outcome vocabulary landed** —
 > `MonoRpgMaker.Abstractions` holds the three pure primitives — **`FixedPoint`** (Q16.16, #3),
 > **`IRandom` + `SplitMix64Random`** (the seeded integer-only deterministic RNG seam, #4), **`GridPoint`**
 > (the pure `(int X, int Y)` coordinate, #5) — and the **event seam** (**`IMapEvent`**, **`EventTrigger`**,
@@ -59,11 +59,18 @@ generator, NO Abstractions assembly, NO replay-hash gate):
 > `DateTime`/`DateTimeOffset`/`Environment.TickCount` **un-compilable in simulation code** — namespace-scoped
 > to `Engine.{World,Entities,Data,Sim}` + `Abstractions`, host/renderer carved out — surfaced as warnings
 > that become build **errors under `-warnaserror`**. `FixedPoint.ToDouble` is the sanctioned
-> **`[DeterminismExempt]`** boundary (the reusable carve-out marker). `bin/gate.sh` GREEN [full]: coverage
-> **97.7%**, mutation MSI **Engine 91.30% / Abstractions 82.22% / Analyzers 92.35%** (gate:12 now mutates
-> the analyzer too); the NetArchTest "Project → Abstractions only" ring still holds (an analyzer
-> `ProjectReference` is not a runtime dependency). **Remaining P0:** the **outcome-return purity** analyzer
-> (D-0017) and the generator/validator/scaffolding below.
+> **`[DeterminismExempt]`** boundary (the reusable carve-out marker). **The shared outcome vocabulary is now
+> live** (#8 / `WORK-p0-outcome-vocabulary`): a closed sealed-record DU **`Outcome`** in Abstractions
+> (**`SetSwitch`** / **`AddCounter`** / **`ShowMessage`**) that map events **return** instead of mutating via
+> verbs — `IMapEvent.Run` now returns `IReadOnlyList<Outcome>`, `IEventContext` slimmed to the read verbs
+> (`GetSwitch`/`GetCounter`), and an Engine **`OutcomeApplier`** applies them; D-0017's "raw state mutation
+> won't type-check" model is realized on the event seam (the tracer migrated, behaviour identical). The DU is
+> **additive + closed to the Project layer** (non-public base ctor) so P2's `IEffect`/`ITrait`/… extend the
+> *same* vocabulary — one registry, not two. `bin/gate.sh` GREEN [full]: coverage **97.6%**, mutation MSI
+> **Engine 90.67% / Abstractions 82.22% / Analyzers 92.35%**; the NetArchTest "Project → Abstractions only"
+> ring still holds. **Remaining P0:** the **outcome-return purity** analyzer (D-0017 — now **unblocked**: it
+> enforces the just-landed return-then-apply model, reusing `MonoRpgMaker.Analyzers`/`SimScope`/the MRM band)
+> and the generator/validator/scaffolding below.
 
 - `MonoRpgMaker.Abstractions`; the **`FixedPoint` (Q16.16)** primitive as the *only* sim numeric type.
 - **Generator/validator split:** a Roslyn generator that does ONLY dumb, syntax-keyed emit and ALWAYS
@@ -78,7 +85,8 @@ generator, NO Abstractions assembly, NO replay-hash gate):
   them; the agent fills only the `// fill:` holes.
 - Analyzers: the float / `MathF` / `Vector2` / `foreach`-over-`Dictionary`(+`HashSet`) + `System.Random` /
   `DateTime` determinism ban **landed** as `MonoRpgMaker.Analyzers` (MRM1001–1005, #7); **outcome-return
-  purity** (D-0017) is the remaining analyzer. NetArchTest Project → Abstractions only.
+  purity** (D-0017) is the remaining analyzer — **now unblocked** by the `Outcome` vocabulary (#8) it enforces.
+  NetArchTest Project → Abstractions only.
 
 ## P1 — Determinism + state spine (+ content/data format)
 

@@ -17,6 +17,7 @@ public sealed class WorldSim
     private readonly List<IMapEvent> _events;
     private readonly List<DoorRule> _doors;
     private readonly EventContext _eventContext;
+    private readonly OutcomeApplier _applier;
 
     /// <summary>Assemble a simulation from a map, a player, its events and its doors.</summary>
     public WorldSim(TileMap map, Actor player, IEnumerable<IMapEvent> events, IEnumerable<DoorRule> doors)
@@ -31,7 +32,8 @@ public sealed class WorldSim
         State = new GameState();
         _events = new List<IMapEvent>(events);
         _doors = new List<DoorRule>(doors);
-        _eventContext = new EventContext(State, message => CurrentMessage = message);
+        _eventContext = new EventContext(State);
+        _applier = new OutcomeApplier(State, message => CurrentMessage = message);
         SyncDoors();
     }
 
@@ -75,7 +77,7 @@ public sealed class WorldSim
         foreach (var mapEvent in _events)
         {
             if (mapEvent.Trigger == EventTrigger.StepOn && mapEvent.Cell == cell.ToGridPoint())
-                mapEvent.Run(_eventContext);
+                _applier.Apply(mapEvent.Run(_eventContext));
         }
     }
 }

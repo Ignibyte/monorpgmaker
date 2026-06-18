@@ -4,37 +4,25 @@ using MonoRpgMaker.Abstractions;
 namespace MonoRpgMaker.Engine.Sim;
 
 /// <summary>
-/// The Engine-side implementation of the <see cref="IEventContext"/> seam: the verbs a
-/// map event may use, delegated to a live <see cref="GameState"/> and a message sink.
-/// Events speak verbs through the interface; they never touch tiles or rendering directly.
+/// The Engine-side implementation of the read-only <see cref="IEventContext"/> seam: the switch +
+/// counter reads a map event branches on, delegated to a live <see cref="GameState"/>. Events read
+/// through this seam and <em>return</em> their effects as <see cref="Outcome"/>s; an
+/// <see cref="OutcomeApplier"/> applies them. The context never mutates state.
 /// </summary>
 public sealed class EventContext : IEventContext
 {
     private readonly GameState _state;
-    private readonly Action<string> _showMessage;
 
-    /// <summary>Create a context over the live <paramref name="state"/> and a message sink.</summary>
-    public EventContext(GameState state, Action<string> showMessage)
+    /// <summary>Create a read context over the live <paramref name="state"/>.</summary>
+    public EventContext(GameState state)
     {
         ArgumentNullException.ThrowIfNull(state);
-        ArgumentNullException.ThrowIfNull(showMessage);
-
         _state = state;
-        _showMessage = showMessage;
     }
 
     /// <inheritdoc />
     public bool GetSwitch(string key) => _state.Get(key);
 
     /// <inheritdoc />
-    public void SetSwitch(string key, bool value) => _state.Set(key, value);
-
-    /// <inheritdoc />
     public int GetCounter(string key) => _state.GetCount(key);
-
-    /// <inheritdoc />
-    public void AddCounter(string key, int amount) => _state.Add(key, amount);
-
-    /// <inheritdoc />
-    public void ShowMessage(string text) => _showMessage(text);
 }
