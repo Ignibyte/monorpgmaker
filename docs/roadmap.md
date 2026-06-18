@@ -47,14 +47,16 @@ generator, NO Abstractions assembly, NO replay-hash gate):
 
 ## P0 — The chassis (extracted from the tracer) + by-construction scaffolding
 
-> **Status (2026-06-17): slice 1 of N landed** — `MonoRpgMaker.Abstractions` + the
-> `FixedPoint` (Q16.16) integer-backed primitive (ticket #3 / `WORK-p0-abstractions-fixedpoint`).
-> `bin/gate.sh` GREEN [full]: coverage 99.1%, mutation MSI Engine 91.30% / Abstractions 82.46%.
-> The mutation gate now floors MSI on **every** production project (Engine + Abstractions), and the
-> NetArchTest "Project → Abstractions only" ring is live. **Remaining P0 slices:** the sim
-> float/`MathF`/`Vector2`/`foreach`-over-`Dictionary` ban analyzer (+ its sim/host scoping), the
-> `IRandom`/`IDeterministicRng` seam + a deterministic RNG, extracting the event seam interfaces
-> into Abstractions, and the generator/validator/scaffolding below.
+> **Status (2026-06-18): slices 1–2 of N landed** — `MonoRpgMaker.Abstractions` now holds both
+> determinism primitives: **`FixedPoint`** (Q16.16, ticket #3 / `WORK-p0-abstractions-fixedpoint`)
+> and **`IRandom` + `SplitMix64Random`** (the seeded integer-only deterministic RNG seam, ticket #4 /
+> `WORK-p0-irandom-rng`). `bin/gate.sh` GREEN [full]: coverage 99.2%, mutation MSI Engine 91.30% /
+> Abstractions 80.0% (the tight margin is `>>`/`>>>`-on-unsigned equivalent-mutant noise, not a test
+> gap — see PR-claude-stryker-unsigned-shift-equivalent-001). The mutation gate floors MSI on **every**
+> production project, and the NetArchTest "Project → Abstractions only" ring is live. **Remaining P0
+> slices:** the sim float/`MathF`/`Vector2`/`foreach`-over-`Dictionary` ban analyzer (+ its sim/host
+> scoping), extracting the event seam interfaces (`IMapEvent`/`EventTrigger`) into Abstractions, and the
+> generator/validator/scaffolding below.
 
 - `MonoRpgMaker.Abstractions`; the **`FixedPoint` (Q16.16)** primitive as the *only* sim numeric type.
 - **Generator/validator split:** a Roslyn generator that does ONLY dumb, syntax-keyed emit and ALWAYS
