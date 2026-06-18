@@ -31,9 +31,11 @@ public sealed class ArchitectureTests
     [Fact]
     public void Simulation_namespaces_must_not_depend_on_rendering()
     {
-        // World / Entities / Data / Sim are pure simulation: they may use core XNA
-        // math (Point, Vector2) but must never reach into Graphics (Texture2D,
-        // SpriteBatch, GraphicsDevice) — simulation stays separate from rendering.
+        // World / Entities / Data / Sim are pure simulation: they may use the integer XNA
+        // Point, but NOT float-backed math like Vector2 (banned in sim by the determinism
+        // analyzer, MRM1002), and must never reach into Graphics (Texture2D, SpriteBatch,
+        // GraphicsDevice). This test guards the coarser layering rule (simulation stays
+        // separate from rendering); the analyzer owns the construct-level determinism bans.
         var result = Types.InAssembly(EngineAssembly)
             .That()
             .ResideInNamespaceStartingWith("MonoRpgMaker.Engine.World")

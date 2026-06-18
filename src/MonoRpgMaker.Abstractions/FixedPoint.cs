@@ -97,6 +97,7 @@ public readonly struct FixedPoint : IEquatable<FixedPoint>, IComparable<FixedPoi
     public int ToInt() => Raw / OneRaw;
 
     /// <summary>Converts to <see cref="double"/> — diagnostics and tests only; never use in sim math.</summary>
+    [DeterminismExempt]
     public double ToDouble() => (double)Raw / OneRaw;
 
     /// <inheritdoc />

@@ -20,8 +20,10 @@ indent_size = 2
 indent_size = 4
 
 # Test projects: xUnit method names use Method_Scenario_Expectation underscores,
-# and test classes are public for discovery — both clash with general API naming
-# rules that don't apply to test code.
+# test classes are public for discovery, and tests deliberately type locals as the
+# interface under test (e.g. `IEventContext ctx = new EventContext(...)`) — all clash
+# with general API/perf rules (CA1707/CA1515/CA1859) that don't apply to test code.
 [tests/**.cs]
 dotnet_diagnostic.CA1707.severity = none
 dotnet_diagnostic.CA1515.severity = none
+dotnet_diagnostic.CA1859.severity = none

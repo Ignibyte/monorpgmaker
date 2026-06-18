@@ -238,7 +238,7 @@ else
     # Run from the test project, mutating each referenced production project in turn
     # (Stryker's canonical invocation; avoids .slnx solution-parsing). break=0 default,
     # so Stryker never fails the run on a low score — the floor below is the gate.
-    for proj in MonoRpgMaker.Engine.csproj MonoRpgMaker.Abstractions.csproj; do
+    for proj in MonoRpgMaker.Engine.csproj MonoRpgMaker.Abstractions.csproj MonoRpgMaker.Analyzers.csproj; do
       out=$( (cd "$testdir" && dotnet stryker --project "$proj" --reporter cleartext) 2>&1 ) \
         || { echo "$out" | tail -20; echo "stryker did not complete for $proj"; return 1; }
       msi=$(echo "$out" | grep -oiE 'mutation score[^0-9]*[0-9]+\.?[0-9]*' | grep -oE '[0-9]+\.?[0-9]*' | tail -1)

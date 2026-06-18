@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The sim-determinism analyzer (D-0016): a Roslyn DiagnosticAnalyzer that bans
+    float/double/MathF/Vector2/foreach-over-Dictionary/Random/DateTime in the SIMULATION
+    namespaces only (the MonoGame host/renderer is carved out). netstandard2.0 is the Roslyn
+    analyzer requirement; Microsoft.CodeAnalysis.CSharp is pinned at/below the SDK's compiler
+    version so the analyzer loads without RS1041. Consumed by Engine + Abstractions as an
+    `OutputItemType="Analyzer"` ProjectReference (see those .csproj files) — never shipped at runtime.
+  -->
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <!-- Analyzer release tracking (RS2008): the rule ids must be declared so -warnaserror stays green. -->
+  <ItemGroup>
+    <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
+    <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
+  </ItemGroup>
+
+  <!-- The pure SimScope helpers are internal; the test project unit-tests them directly. -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="MonoRpgMaker.Engine.Tests" />
+  </ItemGroup>
+
+</Project>

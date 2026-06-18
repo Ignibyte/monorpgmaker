@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/MonoRpgMaker.Abstractions/MonoRpgMaker.Abstractions.csproj" />
+    <Project Path="src/MonoRpgMaker.Analyzers/MonoRpgMaker.Analyzers.csproj" />
     <Project Path="src/MonoRpgMaker.Editor/MonoRpgMaker.Editor.csproj" />
     <Project Path="src/MonoRpgMaker.Engine/MonoRpgMaker.Engine.csproj" />
     <Project Path="src/MonoRpgMaker.Player/MonoRpgMaker.Player.csproj" />
