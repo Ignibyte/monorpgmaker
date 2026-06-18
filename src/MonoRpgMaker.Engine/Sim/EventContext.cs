@@ -1,14 +1,16 @@
 using System;
+using MonoRpgMaker.Abstractions;
 
 namespace MonoRpgMaker.Engine.Sim;
 
 /// <summary>
-/// The minimal surface a map event may touch when it runs: read/write game state
-/// and show a message. This is the embryonic semantic-verb surface the future
-/// EventContext seam grows from — events never poke tiles or rendering directly.
+/// The Engine-side implementation of the <see cref="IEventContext"/> seam: the verbs a
+/// map event may use, delegated to a live <see cref="GameState"/> and a message sink.
+/// Events speak verbs through the interface; they never touch tiles or rendering directly.
 /// </summary>
-public sealed class EventContext
+public sealed class EventContext : IEventContext
 {
+    private readonly GameState _state;
     private readonly Action<string> _showMessage;
 
     /// <summary>Create a context over the live <paramref name="state"/> and a message sink.</summary>
@@ -17,13 +19,22 @@ public sealed class EventContext
         ArgumentNullException.ThrowIfNull(state);
         ArgumentNullException.ThrowIfNull(showMessage);
 
-        State = state;
+        _state = state;
         _showMessage = showMessage;
     }
 
-    /// <summary>The live switch store.</summary>
-    public GameState State { get; }
+    /// <inheritdoc />
+    public bool GetSwitch(string key) => _state.Get(key);
 
-    /// <summary>Display <paramref name="text"/> to the player.</summary>
+    /// <inheritdoc />
+    public void SetSwitch(string key, bool value) => _state.Set(key, value);
+
+    /// <inheritdoc />
+    public int GetCounter(string key) => _state.GetCount(key);
+
+    /// <inheritdoc />
+    public void AddCounter(string key, int amount) => _state.Add(key, amount);
+
+    /// <inheritdoc />
     public void ShowMessage(string text) => _showMessage(text);
 }

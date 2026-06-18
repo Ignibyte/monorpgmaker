@@ -1,5 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
+using MonoRpgMaker.Abstractions;
 using MonoRpgMaker.Engine.Entities;
 using MonoRpgMaker.Engine.Sim;
 using MonoRpgMaker.Engine.Sim.Tracer;
@@ -36,7 +37,7 @@ public class WorldSimMovementTests
     [Fact] // T8 — REQ-002 (dispatch precision)
     public void MovePlayer_FiresStepOnEvent_OnlyAtItsCell()
     {
-        var sim = Sim(new TileMap(5, 3), new Point(1, 1), new IMapEvent[] { new LeverEvent(new Point(3, 1)) });
+        var sim = Sim(new TileMap(5, 3), new Point(1, 1), new IMapEvent[] { new LeverEvent(new GridPoint(3, 1)) });
 
         Assert.True(sim.MovePlayer(Direction.Right));   // -> (2,1): not the event cell
         Assert.Null(sim.CurrentMessage);
@@ -171,7 +172,7 @@ public class TracerChestTests
     // A minimal 3x3 room with the player one tile west of a chest at (2,1).
     private static WorldSim ChestSim() =>
         new(new TileMap(3, 3), new Actor("Hero", new Point(1, 1), maxHp: 10),
-            new IMapEvent[] { new ChestEvent(new Point(2, 1)) }, Array.Empty<DoorRule>());
+            new IMapEvent[] { new ChestEvent(new GridPoint(2, 1)) }, Array.Empty<DoorRule>());
 
     [Fact] // CT1 — REQ-001
     public void Chest_FirstStepOn_GrantsOnePotion_AndShowsTakeMessage()

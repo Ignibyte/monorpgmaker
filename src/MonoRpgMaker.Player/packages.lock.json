@@ -40,8 +40,14 @@
         "resolved": "0.10.4",
         "contentHash": "WYnil3DhQHzjCY0dM9I2B3r1vWip90AOuQd25KE4NrjPQBg0tBJFluRLm5YPnO5ZLDmwrfosY8jCQGQRmWI/Pg=="
       },
-      "monorpgmaker.engine": {
+      "monorpgmaker.abstractions": {
         "type": "Project"
+      },
+      "monorpgmaker.engine": {
+        "type": "Project",
+        "dependencies": {
+          "MonoRpgMaker.Abstractions": "[1.0.0, )"
+        }
       }
     }
   }

@@ -146,13 +146,13 @@
         }
       },
       "monorpgmaker.abstractions": {
-        "type": "Project",
-        "dependencies": {
-          "MonoGame.Framework.DesktopGL": "[3.8.4.1, )"
-        }
+        "type": "Project"
       },
       "monorpgmaker.engine": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "MonoRpgMaker.Abstractions": "[1.0.0, )"
+        }
       }
     }
   }

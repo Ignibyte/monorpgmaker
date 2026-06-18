@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using MonoRpgMaker.Abstractions;
 using MonoRpgMaker.Engine.Entities;
 using MonoRpgMaker.Engine.World;
 
@@ -66,7 +67,7 @@ public static class TracerRoom
         map.SetTile(leverCell, Lever);
 
         var player = new Actor("Hero", new Point(2, doorRow), maxHp: 30);
-        var events = new IMapEvent[] { new LeverEvent(leverCell), new ChestEvent(chestCell) };
+        var events = new IMapEvent[] { new LeverEvent(leverCell.ToGridPoint()), new ChestEvent(chestCell.ToGridPoint()) };
         var doors = new[]
         {
             new DoorRule(doorCell, LeverEvent.DoorSwitch, DoorClosed, DoorOpen),

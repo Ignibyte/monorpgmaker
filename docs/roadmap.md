@@ -47,19 +47,19 @@ generator, NO Abstractions assembly, NO replay-hash gate):
 
 ## P0 — The chassis (extracted from the tracer) + by-construction scaffolding
 
-> **Status (2026-06-18): slices 1–3 of N landed** — `MonoRpgMaker.Abstractions` now holds the three
-> pure primitives: **`FixedPoint`** (Q16.16, ticket #3 / `WORK-p0-abstractions-fixedpoint`),
-> **`IRandom` + `SplitMix64Random`** (the seeded integer-only deterministic RNG seam, #4 /
-> `WORK-p0-irandom-rng`), and **`GridPoint`** (the pure `(int X, int Y)` coordinate the seam adopts
-> instead of XNA `Point`, #5 / `WORK-p0-gridpoint`). `bin/gate.sh` GREEN [full]: coverage 99.2%,
-> mutation MSI Engine 91.30% / Abstractions 82.22% (GridPoint's killable mutants restored margin over
-> the floor; the residual survivors are documented equivalents). The mutation gate floors MSI on
-> **every** production project, and the NetArchTest "Project → Abstractions only" ring is live.
-> **Immediate next — slice 3b (the event-seam extraction proper):** move `IMapEvent`/`EventTrigger`
-> into Abstractions, abstract `EventContext` as `IEventContext`, add the `Point`↔`GridPoint` adapter +
-> the Engine→Abstractions edge, and migrate the tracer (`LeverEvent`/`ChestEvent`/`WorldSim`/
-> `TracerRoom`) + tests (the ~13-file `Point` migration `GridPoint` was built to unblock). **Then:** the
-> sim float/`MathF`/`Vector2`/`foreach`-over-`Dictionary` ban analyzer (+ its sim/host scoping), and the
+> **Status (2026-06-18): slices 1–3 + 3b landed** — `MonoRpgMaker.Abstractions` holds the three pure
+> primitives — **`FixedPoint`** (Q16.16, #3), **`IRandom` + `SplitMix64Random`** (the seeded
+> integer-only deterministic RNG seam, #4), **`GridPoint`** (the pure `(int X, int Y)` coordinate, #5) —
+> and now the **event seam itself**: **`IMapEvent`** (`GridPoint Cell`, `Run(IEventContext)`),
+> **`EventTrigger`**, and **`IEventContext`** (the `GetSwitch`/`SetSwitch`/`GetCounter`/`AddCounter`/
+> `ShowMessage` semantic-verb surface authored events program against), #6 / `WORK-p0-eventseam`. The
+> first **Engine→Abstractions consumption edge** is live; the tracer (`LeverEvent`/`ChestEvent`/
+> `WorldSim`/`TracerRoom`) consumes the published seam via a `Point`↔`GridPoint` adapter, while
+> `GameState`/`EventContext` stay runtime in Engine (the World/host keep XNA `Point` — only the seam
+> adopts `GridPoint`). `bin/gate.sh` GREEN [full]: coverage 99.2%, mutation MSI Engine 91.30% /
+> Abstractions 82.22%. The mutation gate floors MSI on **every** production project, and the NetArchTest
+> "Project → Abstractions only" ring is live. **Remaining P0:** the sim float/`MathF`/`Vector2`/
+> `foreach`-over-`Dictionary` ban analyzer (+ its sim/host scoping), and the
 > generator/validator/scaffolding below.
 
 - `MonoRpgMaker.Abstractions`; the **`FixedPoint` (Q16.16)** primitive as the *only* sim numeric type.

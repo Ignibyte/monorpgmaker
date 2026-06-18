@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using MonoRpgMaker.Abstractions;
 using MonoRpgMaker.Engine.Entities;
 using MonoRpgMaker.Engine.World;
 
@@ -73,7 +74,7 @@ public sealed class WorldSim
     {
         foreach (var mapEvent in _events)
         {
-            if (mapEvent.Trigger == EventTrigger.StepOn && mapEvent.Cell == cell)
+            if (mapEvent.Trigger == EventTrigger.StepOn && mapEvent.Cell == cell.ToGridPoint())
                 mapEvent.Run(_eventContext);
         }
     }

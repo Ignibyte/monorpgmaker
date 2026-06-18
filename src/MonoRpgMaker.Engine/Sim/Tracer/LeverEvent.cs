@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework;
+using MonoRpgMaker.Abstractions;
 
 namespace MonoRpgMaker.Engine.Sim.Tracer;
 
@@ -14,21 +14,21 @@ public sealed class LeverEvent : IMapEvent
     public const string DoorSwitch = "door_open";
 
     /// <summary>Create the lever event at <paramref name="cell"/>.</summary>
-    public LeverEvent(Point cell) => Cell = cell;
+    public LeverEvent(GridPoint cell) => Cell = cell;
 
     /// <inheritdoc />
-    public Point Cell { get; }
+    public GridPoint Cell { get; }
 
     /// <inheritdoc />
     public EventTrigger Trigger => EventTrigger.StepOn;
 
     /// <inheritdoc />
-    public void Run(EventContext context)
+    public void Run(IEventContext context)
     {
-        if (context.State.Get(DoorSwitch))
+        if (context.GetSwitch(DoorSwitch))
             return;
 
         context.ShowMessage("You pull the lever. The door grinds open.");
-        context.State.Set(DoorSwitch, true);
+        context.SetSwitch(DoorSwitch, true);
     }
 }

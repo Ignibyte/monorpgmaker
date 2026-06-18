@@ -1,4 +1,4 @@
-using Microsoft.Xna.Framework;
+using MonoRpgMaker.Abstractions;
 
 namespace MonoRpgMaker.Engine.Sim.Tracer;
 
@@ -18,25 +18,25 @@ public sealed class ChestEvent : IMapEvent
     public const string PotionCount = "potions";
 
     /// <summary>Create the chest event at <paramref name="cell"/>.</summary>
-    public ChestEvent(Point cell) => Cell = cell;
+    public ChestEvent(GridPoint cell) => Cell = cell;
 
     /// <inheritdoc />
-    public Point Cell { get; }
+    public GridPoint Cell { get; }
 
     /// <inheritdoc />
     public EventTrigger Trigger => EventTrigger.StepOn;
 
     /// <inheritdoc />
-    public void Run(EventContext context)
+    public void Run(IEventContext context)
     {
-        if (context.State.Get(OpenedSwitch))
+        if (context.GetSwitch(OpenedSwitch))
         {
             context.ShowMessage("The chest is empty.");
             return;
         }
 
-        context.State.Add(PotionCount, 1);
-        context.State.Set(OpenedSwitch, true);
+        context.AddCounter(PotionCount, 1);
+        context.SetSwitch(OpenedSwitch, true);
         context.ShowMessage("You open the chest and take a potion.");
     }
 }
