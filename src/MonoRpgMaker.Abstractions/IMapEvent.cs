@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace MonoRpgMaker.Abstractions;
 
 /// <summary>A scripted interaction placed on a single map cell — the published seam an
@@ -10,6 +12,10 @@ public interface IMapEvent
     /// <summary>What activates the event.</summary>
     EventTrigger Trigger { get; }
 
-    /// <summary>Run the event's behaviour against <paramref name="context"/>.</summary>
-    void Run(IEventContext context);
+    /// <summary>
+    /// Run the event's behaviour: read state through <paramref name="context"/> and <em>return</em> the
+    /// declarative <see cref="Outcome"/>s to apply, in order (D-0017). The event never mutates state
+    /// directly; an empty list means "do nothing".
+    /// </summary>
+    IReadOnlyList<Outcome> Run(IEventContext context);
 }

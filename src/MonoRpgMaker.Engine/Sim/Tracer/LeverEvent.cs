@@ -1,11 +1,12 @@
+using System.Collections.Generic;
 using MonoRpgMaker.Abstractions;
 
 namespace MonoRpgMaker.Engine.Sim.Tracer;
 
 /// <summary>
-/// The hand-authored M0 exemplar event: stepping onto the lever shows a message once
-/// and opens the door (by setting the <see cref="DoorSwitch"/> switch). This is the
-/// target shape the scaffolder will later emit — set a flag and narrate; the door
+/// The hand-authored M0 exemplar event: stepping onto the lever shows a message once and opens the
+/// door (by <em>returning</em> a <see cref="SetSwitch"/> outcome for the <see cref="DoorSwitch"/>).
+/// This is the target shape the scaffolder will later emit — read a flag, RETURN effects; the door
 /// reacts via its <see cref="DoorRule"/>.
 /// </summary>
 public sealed class LeverEvent : IMapEvent
@@ -23,12 +24,13 @@ public sealed class LeverEvent : IMapEvent
     public EventTrigger Trigger => EventTrigger.StepOn;
 
     /// <inheritdoc />
-    public void Run(IEventContext context)
+    public IReadOnlyList<Outcome> Run(IEventContext context)
     {
         if (context.GetSwitch(DoorSwitch))
-            return;
+        {
+            return [];
+        }
 
-        context.ShowMessage("You pull the lever. The door grinds open.");
-        context.SetSwitch(DoorSwitch, true);
+        return [new ShowMessage("You pull the lever. The door grinds open."), new SetSwitch(DoorSwitch, true)];
     }
 }

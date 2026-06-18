@@ -139,11 +139,9 @@ public class SimGuardTests
     }
 
     [Fact]
-    public void EventContext_Ctor_NullArgs_Throw()
+    public void EventContext_Ctor_NullState_Throws()
     {
-        var state = new GameState();
-        Assert.Throws<ArgumentNullException>(() => new EventContext(null!, _ => { }));
-        Assert.Throws<ArgumentNullException>(() => new EventContext(state, null!));
+        Assert.Throws<ArgumentNullException>(() => new EventContext(null!));
     }
 
     [Fact]
