@@ -83,8 +83,9 @@ always-on; if `localhost:8080/health` is down, restart it with
 - **Recall** before planning/coding: `knowledge-search`, `knowledge-context`
   (lessons/failures/prevention rules), `docs-search` (design docs),
   `code-find`/`code-callers`/`code-callees` (the C# codegraph).
-- **IMPORTANT — pass `repo: "monorpgmaker"`** to the code tools. They default to
-  the `oathstar` repo; without the arg you'll search the wrong project.
+- **IMPORTANT — pass `repo: "monorpgmaker"`** to the code tools. They default to a
+  generic `example-repo` (not monorpgmaker, not the `oathstar` predecessor) — without
+  the arg you'll search the wrong/empty index.
 - **`knowledge-search` / `docs-search` have NO project filter and bleed across
   tenants** (verified: a `docs-search` returned oathstar's Datastar/Tauri/Rust
   docs; `source_path` collides — both repos have `docs/technical-architecture.md`).
