@@ -9,5 +9,9 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MonoRpgMaker.Abstractions\MonoRpgMaker.Abstractions.csproj" />
+    <!-- The sim-determinism analyzer (D-0016) runs at build under -warnaserror. ReferenceOutputAssembly=false
+         keeps it a build-time tool only (no runtime dependency). -->
+    <ProjectReference Include="..\MonoRpgMaker.Analyzers\MonoRpgMaker.Analyzers.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

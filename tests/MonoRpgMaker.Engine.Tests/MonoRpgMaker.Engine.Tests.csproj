@@ -16,6 +16,8 @@
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4.1" />
     <!-- Architecture guardrails (CONSTITUTION §14): the layering rules asserted as xUnit tests. -->
     <PackageReference Include="NetArchTest.Rules" Version="1.3.2" />
+    <!-- Drives the sim-determinism analyzer over in-memory snippets (SimDeterminismAnalyzerTests). -->
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,6 +27,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\MonoRpgMaker.Abstractions\MonoRpgMaker.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\MonoRpgMaker.Engine\MonoRpgMaker.Engine.csproj" />
+    <!-- Plain library reference (NOT OutputItemType=Analyzer): the tests instantiate the analyzer and
+         call its internal SimScope helpers (InternalsVisibleTo) directly; it does not analyze the tests. -->
+    <ProjectReference Include="..\..\src\MonoRpgMaker.Analyzers\MonoRpgMaker.Analyzers.csproj" />
   </ItemGroup>
 
 </Project>

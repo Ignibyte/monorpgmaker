@@ -2,4 +2,10 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
+  <ItemGroup>
+    <!-- The sim-determinism analyzer (D-0016) also guards the Abstractions sim primitives.
+         ReferenceOutputAssembly=false keeps the "Project → Abstractions only" purity ring intact. -->
+    <ProjectReference Include="..\MonoRpgMaker.Analyzers\MonoRpgMaker.Analyzers.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
 </Project>
