@@ -47,19 +47,23 @@ recall from the forge first and capture lessons after.
 ## The gate — `bin/gate.sh` (binding: CONSTITUTION §0)
 
 The single source of truth for shippable. Strict, no baselines, source-fix only.
-**12 gates**:
+**13 gates**:
 
 ```
 1 format   2 build(-warnaserror)  3 test   4 vuln-deps  5 licenses(SPDX allowlist)
 6 gitleaks  7 shellcheck  8 no-suppressions  9 source-bans(SAST)  10 doc-todos
+13 .expect oracle (MRM0006 — real handlers vs authored tables; always-run correctness)
 [FULL] 11 coverage (coverlet line floor)   12 mutation (Stryker MSI)
 ```
 
-- `bin/gate.sh` — FULL (all 12, incl. coverage + mutation). Required before `/commit`.
-- `bin/gate.sh --fast` — the 10 static gates, for a quick loop (`GATE GREEN [fast]`).
-  Only a FULL green writes `.git/monorpgmaker-gate-receipt`, so `--fast` can't satisfy `/commit`.
+- `bin/gate.sh` — FULL (all 13, incl. coverage + mutation). Required before `/commit`.
+- `bin/gate.sh --fast` — the 11 always-run gates (the 10 static + the .expect oracle), for a
+  quick loop (`GATE GREEN [fast]`). gate:13 runs in both modes (it's numbered after 11–12 but is
+  cheap correctness, not FULL-only). Only a FULL green writes `.git/monorpgmaker-gate-receipt`, so
+  `--fast` can't satisfy `/commit`.
 - Floors are baked-in minimums env can only raise: `NET_COV_MIN=80`,
-  `MUT_MSI_MIN=80` (actuals ~94% / ~84%); they ratchet up over time.
+  `MUT_MSI_MIN=80` (mutation now covers Engine/Abstractions/Analyzers/Editor; actuals ~81–91%);
+  they ratchet up over time.
 - On a FULL green the gate writes the receipt; `enforce-commit-gate.sh` blocks
   `git commit` of `.cs` unless that fingerprint matches the worktree.
 

@@ -30,6 +30,8 @@
     <!-- Plain library reference (NOT OutputItemType=Analyzer): the tests instantiate the analyzer and
          call its internal SimScope helpers (InternalsVisibleTo) directly; it does not analyze the tests. -->
     <ProjectReference Include="..\..\src\MonoRpgMaker.Analyzers\MonoRpgMaker.Analyzers.csproj" />
+    <!-- The maker tool hosts the .expect oracle (parser/runner/CLI + MapEditor), unit-tested here. -->
+    <ProjectReference Include="..\..\src\MonoRpgMaker.Editor\MonoRpgMaker.Editor.csproj" />
   </ItemGroup>
 
 </Project>

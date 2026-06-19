@@ -1,0 +1,3 @@
+# ChestEvent — first open grants a potion, then empty (give-once)
+=> AddCounter(potions, 1); SetSwitch(chest_opened, true); ShowMessage("You open the chest and take a potion.")
+chest_opened=true => ShowMessage("The chest is empty.")

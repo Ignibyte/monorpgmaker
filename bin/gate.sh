@@ -238,7 +238,7 @@ else
     # Run from the test project, mutating each referenced production project in turn
     # (Stryker's canonical invocation; avoids .slnx solution-parsing). break=0 default,
     # so Stryker never fails the run on a low score — the floor below is the gate.
-    for proj in MonoRpgMaker.Engine.csproj MonoRpgMaker.Abstractions.csproj MonoRpgMaker.Analyzers.csproj; do
+    for proj in MonoRpgMaker.Engine.csproj MonoRpgMaker.Abstractions.csproj MonoRpgMaker.Analyzers.csproj MonoRpgMaker.Editor.csproj; do
       out=$( (cd "$testdir" && dotnet stryker --project "$proj" --reporter cleartext) 2>&1 ) \
         || { echo "$out" | tail -20; echo "stryker did not complete for $proj"; return 1; }
       msi=$(echo "$out" | grep -oiE 'mutation score[^0-9]*[0-9]+\.?[0-9]*' | grep -oE '[0-9]+\.?[0-9]*' | tail -1)
@@ -250,6 +250,14 @@ else
   }
   run_gate "gate:12 mutation (MSI >= ${MUT_MSI_MIN}%)" mutation_g
 fi
+
+# ── Correctness: the .expect oracle (gate #13, MRM0006) — always; cheap. Runs the real
+#    tracer handlers against their authored expectation tables (D-0017 §7). ────────────
+oracle_g() {
+  dotnet run --no-build --verbosity quiet --project src/MonoRpgMaker.Editor \
+    -- check-expectations src/MonoRpgMaker.Engine/Sim/Tracer/Expectations
+}
+run_gate "gate:13 .expect oracle (MRM0006)" oracle_g
 
 # ── Summary ──────────────────────────────────────────────────────────────────
 printf '\n\033[1m══ gate summary (%s) ══\033[0m\n' "$MODE"
