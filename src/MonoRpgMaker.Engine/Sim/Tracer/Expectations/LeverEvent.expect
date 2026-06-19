@@ -1,0 +1,3 @@
+# LeverEvent — pull the lever once to open the door (give-once)
+=> ShowMessage("You pull the lever. The door grinds open."); SetSwitch(door_open, true)
+door_open=true => (none)

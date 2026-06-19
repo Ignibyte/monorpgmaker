@@ -47,7 +47,7 @@ generator, NO Abstractions assembly, NO replay-hash gate):
 
 ## P0 — The chassis (extracted from the tracer) + by-construction scaffolding
 
-> **Status (2026-06-18): slices 1–3 + 3b + the sim-determinism analyzer + the shared outcome vocabulary + the outcome-return analyzer landed** —
+> **Status (2026-06-18): slices 1–3 + 3b + the sim-determinism analyzer + the shared outcome vocabulary + the outcome-return analyzer + the .expect oracle landed** —
 > `MonoRpgMaker.Abstractions` holds the three pure primitives — **`FixedPoint`** (Q16.16, #3),
 > **`IRandom` + `SplitMix64Random`** (the seeded integer-only deterministic RNG seam, #4), **`GridPoint`**
 > (the pure `(int X, int Y)` coordinate, #5) — and the **event seam** (**`IMapEvent`**, **`EventTrigger`**,
@@ -73,10 +73,16 @@ generator, NO Abstractions assembly, NO replay-hash gate):
 > (Abstractions, mirroring `[DeterminismExempt]`); the applier (returns `void`) is never a handler, so it
 > applies freely. This **completes the D-0017 analyzer pair** (float/determinism ban #7 + outcome-return now) —
 > the return-then-apply model (#8) is now compile-time enforced (v1 marks `GameState.Set`/`Add`; broader
-> mutator-paths extend the marker as P2 handler kinds land). `bin/gate.sh` GREEN [full]: coverage **97.4%**,
-> mutation MSI **Engine 90.67% / Abstractions 82.22% / Analyzers 91.18%**; the NetArchTest "Project →
-> Abstractions only" ring still holds. **Remaining P0:** the generator/validator/scaffolding + the `.expect`
-> oracle (gate #13 / `MRM0006`) below.
+> mutator-paths extend the marker as P2 handler kinds land). **The `.expect` oracle is now live** (#10 /
+> `WORK-p0-expect-oracle`): executable correctness contracts as a new **gate #13 / `MRM0006`** — an authored
+> `<module>.expect` table (input state → expected `Outcome` rows) is run against the **real** handler and a
+> mismatch fails the gate, closing the self-grading gap (§10) for the event handlers (intent is now
+> *executable*, authored separately from the implementing agent). The maker tool **`MonoRpgMaker.Editor` is now
+> a CLI host** (`Exe`) owning the oracle (`ExpectationParser`/`Runner`/`HandlerRegistry`/`OracleCli`) + is now
+> coverage+mutation-gated; `Lever`/`Chest` ship `.expect` tables. `bin/gate.sh` GREEN [full] (**13 gates**):
+> coverage **98.0%**, mutation MSI **Engine 90.67% / Abstractions 82.22% / Analyzers 91.18% / Editor 81.08%**;
+> the NetArchTest "Project → Abstractions only" ring still holds. **Remaining P0:** the
+> **generator/validator/scaffolding** (the by-construction emitters) below.
 
 - `MonoRpgMaker.Abstractions`; the **`FixedPoint` (Q16.16)** primitive as the *only* sim numeric type.
 - **Generator/validator split:** a Roslyn generator that does ONLY dumb, syntax-keyed emit and ALWAYS

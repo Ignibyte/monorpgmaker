@@ -173,6 +173,12 @@
       "monorpgmaker.analyzers": {
         "type": "Project"
       },
+      "monorpgmaker.editor": {
+        "type": "Project",
+        "dependencies": {
+          "MonoRpgMaker.Engine": "[1.0.0, )"
+        }
+      },
       "monorpgmaker.engine": {
         "type": "Project",
         "dependencies": {
