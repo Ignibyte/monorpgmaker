@@ -14,8 +14,8 @@ namespace MonoRpgMaker.Editor.Expectations;
 /// </summary>
 public static class HandlerRegistry
 {
-    private static readonly IReadOnlyDictionary<string, Func<IMapEvent>> Factories =
-        new Dictionary<string, Func<IMapEvent>>(StringComparer.Ordinal)
+    private static readonly Dictionary<string, Func<IMapEvent>> Factories =
+        new(StringComparer.Ordinal)
         {
             ["LeverEvent"] = static () => new LeverEvent(GridPoint.Zero),
             ["ChestEvent"] = static () => new ChestEvent(GridPoint.Zero),

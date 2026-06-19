@@ -81,8 +81,12 @@ generator, NO Abstractions assembly, NO replay-hash gate):
 > a CLI host** (`Exe`) owning the oracle (`ExpectationParser`/`Runner`/`HandlerRegistry`/`OracleCli`) + is now
 > coverage+mutation-gated; `Lever`/`Chest` ship `.expect` tables. `bin/gate.sh` GREEN [full] (**13 gates**):
 > coverage **98.0%**, mutation MSI **Engine 90.67% / Abstractions 82.22% / Analyzers 91.18% / Editor 81.08%**;
-> the NetArchTest "Project → Abstractions only" ring still holds. **Remaining P0:** the
-> **generator/validator/scaffolding** (the by-construction emitters) below.
+> the NetArchTest "Project → Abstractions only" ring still holds. **The scaffolder landed** (#11 /
+> `WORK-p0-scaffolder`): `monorpg scaffold event <Name>` on the Editor CLI deterministically emits a
+> gate-clean-by-construction handler skeleton (sealed `IMapEvent`, `Run → IReadOnlyList<Outcome>`, `// fill:`
+> holes) + a co-located `.expect` stub — proven gate-clean (the rendered `.cs` compiles + is MRM-clean, the
+> `.expect` parses). **Remaining P0:** a real content/`$data` format + the generator/validator DAG (the rest of
+> the by-construction emitters) below.
 
 - `MonoRpgMaker.Abstractions`; the **`FixedPoint` (Q16.16)** primitive as the *only* sim numeric type.
 - **Generator/validator split:** a Roslyn generator that does ONLY dumb, syntax-keyed emit and ALWAYS
