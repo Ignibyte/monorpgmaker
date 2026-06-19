@@ -30,7 +30,7 @@ This file is the *map of intent*; the slice-by-slice "how" lives in the pipeline
    subscribers; ordering ambiguity / a cycle / a missing dep is a **build error** (`MRM0001`–`0005`),
    topologically sorted — never silent last-wins at runtime. (agentic-substrate §2)
 
-4. **Unified stateful entity (direction, not yet decided).** Everything — player, NPC, enemy, the
+4. **Unified stateful entity (✅ decided #14 — composition + definition/instance).** Everything — player, NPC, enemy, the
    chest, the item in your bag, a quest token — is one **stateful `Entity`** on a single composition
    surface, so the agent writes *one* kind of behavior module and attaches it to anything. Two open
    forks (see below) must be resolved before this is real.
@@ -43,15 +43,15 @@ This file is the *map of intent*; the slice-by-slice "how" lives in the pipeline
    the human **semantically accepts** it via the `.expect` fill-in grid (gate #13). No self-grading.
    (D-0017 §7 — ✅ landed for the event handlers.)
 
-### Open architecture forks (must decide before the unified-entity layer)
-- **Inheritance → composition.** Today `Entity` bakes grid placement into the base (`Cell` / `TryStep`,
-  "lives on the map grid"). For a bag item (no cell) to be an entity, "placed on grid," "has stats,"
-  "movable," "holds inventory" become **attachable capabilities/behaviors**, not base-class fields.
-- **Definition / archetype vs instance.** "Potion" the type = shared **immutable database record**;
-  "the potion in slot 3" = a **stateful entity instance** that *references* it (flyweight). The editor
-  authors *definitions*; the running game spawns *stateful instances*; modules hook the instances.
-- **Tiles stay data (probably).** Thousands of tiles per map ⇒ the tilemap stays the lightweight
-  spatial substrate, not entities — going full ECS/data-oriented is a perf call we defer.
+### Open architecture forks — ✅ RESOLVED by #14 (`AD-claude-unified-entity-model-001`)
+- **Inheritance → composition. ✅ DECIDED: composition.** Capabilities ("placed on grid," "has stats,"
+  "movable," "holds inventory") are **attachable `IComponent`s**, not base-class fields, so a bag item (no
+  cell) can be an entity. (v1: `IComponent` + `StatsComponent`/`PositionComponent`.)
+- **Definition / archetype vs instance. ✅ DECIDED: flyweight.** An immutable `EntityDefinition : IRecord`
+  (the editor-authored template) + a stateful `EntityInstance` that *references* it by id and carries the
+  per-instance component state (what #15 save/load serializes). Modules hook instances.
+- **Tiles stay data. ✅ AFFIRMED.** The tilemap stays the lightweight spatial substrate, not entities —
+  full ECS/data-oriented stays deferred (a perf call).
 
 ---
 
@@ -100,7 +100,7 @@ This file is the *map of intent*; the slice-by-slice "how" lives in the pipeline
 | Additive / layerable outcome vocabulary (one registry, not two) | 🟡 | the `Outcome` DU is additive (#8); P2 extends it with combat/effect cases |
 | Hook lifecycle (ordered subscribers; ambiguity = build error) | ✅ | #13 — `HookSchedule`: ascending-`Order` per (cell,trigger); equal order = a typed ambiguity error at `WorldSim.TryCreate`. The module-registration layer is still future |
 | Trait / effect spine (`IEffect` / `ITrait` / `IStateBehavior` / `IDamageFormula`) | ⬜ | P2 — "items extended to have other meanings" |
-| **Unified stateful entity** (everything = entity; composition; definition↔instance) | ⬜ | open direction — resolve the two forks above first; `Entity` base today is on-grid only |
+| **Unified stateful entity** (everything = entity; composition; definition↔instance) | 🟡 | #14 — first cut: `EntityInstance` (immutable/copy-on-write) + `IComponent` + `EntityDefinition`; forks resolved (`AD-claude-unified-entity-model-001`). Migrating the player/events + retiring the legacy on-grid `Entity` base is deferred |
 | Base-state-first / no-code baseline | 🔒 | principle (generator-always-compilable + visual surfaces); not yet deliverable |
 
 ### E. Editor / UI surfaces  (kept where direct manipulation wins)
@@ -150,10 +150,11 @@ locked next; the rest is a proposed order the user can resequence.
    extensibility without its ordering hell. **Deferred:** autorun / parallel triggers; the module-registration
    system.
 
-4. **#14 — Unified-entity model: AD + first cut.** *The big one; large, design-gated.* Write the
-   architecture decision first (composition over inheritance · definition↔instance · capabilities as
-   attachable behaviors), then refactor `Entity`: an instance references a definition + carries state
-   + attached capabilities, and NPCs **and items** become first-class entities. **AD before code.**
+4. **#14 — Unified-entity model: AD + first cut. ✅ DONE (AD + core).** Wrote the AD
+   (`AD-claude-unified-entity-model-001`: composition over inheritance · definition↔instance flyweight ·
+   tiles stay data) + a minimal first cut: `EntityInstance` (immutable/copy-on-write, a deterministic typed
+   `IComponent` set) + `EntityDefinition : IRecord` + `Stats`/`Position` components. **Deferred:** migrating the
+   player/`Actor`/events into `EntityInstance` + retiring the legacy on-grid `Entity` base.
 
 5. **#15 — Save / load + the stateful spine.** *Proves it; medium.* Serialize `$game` state (switches,
    counters, entity-instance state, the already-capturable RNG state) and load it back deterministically;
