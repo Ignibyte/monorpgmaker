@@ -3,9 +3,11 @@ using Microsoft.CodeAnalysis;
 namespace MonoRpgMaker.Analyzers;
 
 /// <summary>
-/// The diagnostics raised by <see cref="SimDeterminismAnalyzer"/>. Each corresponds to a
-/// construct that breaks bit-identical replay in simulation code (D-0016). Ids live in the
-/// <c>MRM1xxx</c> band (the <c>MRM0xxx</c> band is reserved for the validator).
+/// The diagnostics raised by the determinism analyzers. MRM1001–1005
+/// (<see cref="SimDeterminismAnalyzer"/>) ban determinism-hostile constructs in simulation code
+/// (D-0016); MRM1006 (<see cref="OutcomeReturnPurityAnalyzer"/>) bans state mutation in
+/// outcome-returning handlers (D-0017). Ids live in the <c>MRM1xxx</c> band (the <c>MRM0xxx</c> band
+/// is reserved for the validator).
 /// </summary>
 internal static class DeterminismDiagnostics
 {
@@ -60,4 +62,14 @@ internal static class DeterminismDiagnostics
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "DateTime/DateTimeOffset read ambient wall-clock state, which breaks replay; use the deterministic simulation tick.");
+
+    /// <summary>MRM1006 — a state mutator called from an outcome-returning handler (D-0017).</summary>
+    internal static readonly DiagnosticDescriptor OutcomeReturnPurity = new(
+        id: "MRM1006",
+        title: "Outcome-returning handlers must not mutate game state",
+        messageFormat: "Simulation code must not call the state mutator '{0}' from an outcome-returning handler — return the change as an Outcome instead (D-0017)",
+        category: Category,
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "A handler that returns IReadOnlyList<Outcome> must be pure over its read context; it declares state changes by returning Outcomes (which an applier applies) and must not mutate state directly.");
 }

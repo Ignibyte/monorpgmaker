@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using MonoRpgMaker.Abstractions;
 
 namespace MonoRpgMaker.Engine.Sim;
 
@@ -22,6 +23,7 @@ public sealed class GameState
     }
 
     /// <summary>Set switch <paramref name="key"/> to <paramref name="value"/>.</summary>
+    [StateMutator]
     public void Set(string key, bool value)
     {
         ArgumentNullException.ThrowIfNull(key);
@@ -36,6 +38,7 @@ public sealed class GameState
     }
 
     /// <summary>Add <paramref name="amount"/> to counter <paramref name="key"/>.</summary>
+    [StateMutator]
     public void Add(string key, int amount)
     {
         ArgumentNullException.ThrowIfNull(key);

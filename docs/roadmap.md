@@ -47,7 +47,7 @@ generator, NO Abstractions assembly, NO replay-hash gate):
 
 ## P0 — The chassis (extracted from the tracer) + by-construction scaffolding
 
-> **Status (2026-06-18): slices 1–3 + 3b + the sim-determinism analyzer + the shared outcome vocabulary landed** —
+> **Status (2026-06-18): slices 1–3 + 3b + the sim-determinism analyzer + the shared outcome vocabulary + the outcome-return analyzer landed** —
 > `MonoRpgMaker.Abstractions` holds the three pure primitives — **`FixedPoint`** (Q16.16, #3),
 > **`IRandom` + `SplitMix64Random`** (the seeded integer-only deterministic RNG seam, #4), **`GridPoint`**
 > (the pure `(int X, int Y)` coordinate, #5) — and the **event seam** (**`IMapEvent`**, **`EventTrigger`**,
@@ -66,11 +66,17 @@ generator, NO Abstractions assembly, NO replay-hash gate):
 > (`GetSwitch`/`GetCounter`), and an Engine **`OutcomeApplier`** applies them; D-0017's "raw state mutation
 > won't type-check" model is realized on the event seam (the tracer migrated, behaviour identical). The DU is
 > **additive + closed to the Project layer** (non-public base ctor) so P2's `IEffect`/`ITrait`/… extend the
-> *same* vocabulary — one registry, not two. `bin/gate.sh` GREEN [full]: coverage **97.6%**, mutation MSI
-> **Engine 90.67% / Abstractions 82.22% / Analyzers 92.35%**; the NetArchTest "Project → Abstractions only"
-> ring still holds. **Remaining P0:** the **outcome-return purity** analyzer (D-0017 — now **unblocked**: it
-> enforces the just-landed return-then-apply model, reusing `MonoRpgMaker.Analyzers`/`SimScope`/the MRM band)
-> and the generator/validator/scaffolding below.
+> *same* vocabulary — one registry, not two. **The outcome-return purity analyzer is now live** (#9 /
+> `WORK-p0-outcome-return-analyzer`): **MRM1006** (`OutcomeReturnPurityAnalyzer`, a 2nd analyzer reusing
+> `SimScope`) makes a state mutator called from an **outcome-returning handler** (a method returning
+> `IReadOnlyList<Outcome>`) **un-compilable** — `GameState.Set`/`Add` carry a new **`[StateMutator]`** marker
+> (Abstractions, mirroring `[DeterminismExempt]`); the applier (returns `void`) is never a handler, so it
+> applies freely. This **completes the D-0017 analyzer pair** (float/determinism ban #7 + outcome-return now) —
+> the return-then-apply model (#8) is now compile-time enforced (v1 marks `GameState.Set`/`Add`; broader
+> mutator-paths extend the marker as P2 handler kinds land). `bin/gate.sh` GREEN [full]: coverage **97.4%**,
+> mutation MSI **Engine 90.67% / Abstractions 82.22% / Analyzers 91.18%**; the NetArchTest "Project →
+> Abstractions only" ring still holds. **Remaining P0:** the generator/validator/scaffolding + the `.expect`
+> oracle (gate #13 / `MRM0006`) below.
 
 - `MonoRpgMaker.Abstractions`; the **`FixedPoint` (Q16.16)** primitive as the *only* sim numeric type.
 - **Generator/validator split:** a Roslyn generator that does ONLY dumb, syntax-keyed emit and ALWAYS
@@ -85,8 +91,8 @@ generator, NO Abstractions assembly, NO replay-hash gate):
   them; the agent fills only the `// fill:` holes.
 - Analyzers: the float / `MathF` / `Vector2` / `foreach`-over-`Dictionary`(+`HashSet`) + `System.Random` /
   `DateTime` determinism ban **landed** as `MonoRpgMaker.Analyzers` (MRM1001–1005, #7); **outcome-return
-  purity** (D-0017) is the remaining analyzer — **now unblocked** by the `Outcome` vocabulary (#8) it enforces.
-  NetArchTest Project → Abstractions only.
+  purity** **landed** as **MRM1006** (`OutcomeReturnPurityAnalyzer` + the `[StateMutator]` marker, #9) — the
+  D-0017 analyzer pair is complete. NetArchTest Project → Abstractions only.
 
 ## P1 — Determinism + state spine (+ content/data format)
 

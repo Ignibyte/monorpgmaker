@@ -10,3 +10,4 @@ MRM1002 | Determinism | Warning | XNA float-backed math types banned in simulati
 MRM1003 | Determinism | Warning | foreach over an unordered collection (Dictionary/HashSet) banned in simulation code (D-0016)
 MRM1004 | Determinism | Warning | System.Random banned in simulation code (D-0016)
 MRM1005 | Determinism | Warning | DateTime/DateTimeOffset banned in simulation code (D-0016)
+MRM1006 | Determinism | Warning | Outcome-returning handlers must not mutate game state (D-0017)
