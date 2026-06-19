@@ -117,7 +117,7 @@ This file is the *map of intent*; the slice-by-slice "how" lives in the pipeline
 | Capability | Status | Notes |
 |---|---|---|
 | Desktop (Windows / macOS / Linux, MonoGame DesktopGL) | ✅ | the Player runs |
-| Save / load (serialized `$game` state, RNG state, migrations) | ⬜ | the RNG state is already capturable; no save format yet |
+| Save / load (serialized `$game` state, RNG state, migrations) | 🟡 | #15 — a deterministic, total `SaveState` (switches/counters + player position/facing + RNG state) via STJ source-gen; round-trip + **replay-equivalent** vs the tracer. `EntityInstance`/`$data` serialization + the file UI + migration logic deferred |
 | Audio | ⬜ | |
 | Menus / inventory / party UI | ⬜ | |
 | Console targets + AOT / multi-arch replay-hash gate | ⬜ | the determinism foundation is the precondition |
@@ -127,8 +127,8 @@ This file is the *map of intent*; the slice-by-slice "how" lives in the pipeline
 ## Next 4–5 tickets (proposed game plan)
 
 The arc: **enabler → foundation → extensibility → entity → persistence.** Each builds on the last
-and moves toward the "stateful entities + agent-authored modules" vision. Only #11 is the clear
-locked next; the rest is a proposed order the user can resequence.
+and moves toward the "stateful entities + agent-authored modules" vision. **✅ #11–#15 are all DONE +
+merged** — the P0 chassis arc is complete; the follow-ups noted under each are the next candidates.
 
 1. **#11 — Scaffolder (`monorpg scaffold event <Name>`). ✅ DONE.** A deterministic
    `{{var}}` emitter that mirrors a committed gate-clean fixture → an event-handler skeleton (returns
@@ -156,9 +156,11 @@ locked next; the rest is a proposed order the user can resequence.
    `IComponent` set) + `EntityDefinition : IRecord` + `Stats`/`Position` components. **Deferred:** migrating the
    player/`Actor`/events into `EntityInstance` + retiring the legacy on-grid `Entity` base.
 
-5. **#15 — Save / load + the stateful spine.** *Proves it; medium.* Serialize `$game` state (switches,
-   counters, entity-instance state, the already-capturable RNG state) and load it back deterministically;
-   a save format + a migration reader. Demonstrates "stateful across the board," end-to-end.
+5. **#15 — Save / load + the stateful spine. ✅ DONE.** A deterministic, total `SaveState` (switches,
+   counters, player position/facing, the captured RNG state) via STJ source-gen + a total typed
+   `SaveLoadResult`; proven round-trip + byte-deterministic + **replay-equivalent** against the tracer (a
+   saved $game state restored into a fresh sim re-opens the door). **Deferred:** entity-instance/`$data`
+   serialization; the save-slot/file UI; migration logic. The determinism foundation pays off, end-to-end.
 
 **Stretch / parallel:** the **visual map-paint editor** once #12 lands; the **trait/effect spine**
 (`IEffect` / `ITrait` / `IStateBehavior`) once #14 lands; the AOT / multi-arch replay-hash gate.
