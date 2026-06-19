@@ -12,7 +12,7 @@ namespace MonoRpgMaker.Engine.Tests;
 public class WorldSimMovementTests
 {
     private static WorldSim Sim(TileMap map, Point start, IMapEvent[]? events = null) =>
-        new(map, new Actor("Hero", start, maxHp: 10), events ?? Array.Empty<IMapEvent>(), Array.Empty<DoorRule>());
+        WorldSim.TryCreate(map, new Actor("Hero", start, maxHp: 10), events ?? Array.Empty<IMapEvent>(), Array.Empty<DoorRule>()).Sim!;
 
     [Fact] // T1 — REQ-001
     public void MovePlayer_IntoBlockedTile_DoesNotMove()
@@ -132,10 +132,10 @@ public class SimGuardTests
         var events = Array.Empty<IMapEvent>();
         var doors = Array.Empty<DoorRule>();
 
-        Assert.Throws<ArgumentNullException>(() => new WorldSim(null!, actor, events, doors));
-        Assert.Throws<ArgumentNullException>(() => new WorldSim(map, null!, events, doors));
-        Assert.Throws<ArgumentNullException>(() => new WorldSim(map, actor, null!, doors));
-        Assert.Throws<ArgumentNullException>(() => new WorldSim(map, actor, events, null!));
+        Assert.Throws<ArgumentNullException>(() => WorldSim.TryCreate(null!, actor, events, doors));
+        Assert.Throws<ArgumentNullException>(() => WorldSim.TryCreate(map, null!, events, doors));
+        Assert.Throws<ArgumentNullException>(() => WorldSim.TryCreate(map, actor, null!, doors));
+        Assert.Throws<ArgumentNullException>(() => WorldSim.TryCreate(map, actor, events, null!));
     }
 
     [Fact]
@@ -169,8 +169,8 @@ public class TracerChestTests
 {
     // A minimal 3x3 room with the player one tile west of a chest at (2,1).
     private static WorldSim ChestSim() =>
-        new(new TileMap(3, 3), new Actor("Hero", new Point(1, 1), maxHp: 10),
-            new IMapEvent[] { new ChestEvent(new GridPoint(2, 1)) }, Array.Empty<DoorRule>());
+        WorldSim.TryCreate(new TileMap(3, 3), new Actor("Hero", new Point(1, 1), maxHp: 10),
+            new IMapEvent[] { new ChestEvent(new GridPoint(2, 1)) }, Array.Empty<DoorRule>()).Sim!;
 
     [Fact] // CT1 — REQ-001
     public void Chest_FirstStepOn_GrantsOnePotion_AndShowsTakeMessage()

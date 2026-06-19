@@ -13,6 +13,12 @@ public interface IMapEvent
     EventTrigger Trigger { get; }
 
     /// <summary>
+    /// Relative run order within a (cell, trigger) group; lower runs first. Two events that share a cell,
+    /// trigger, and order are an ambiguity error at sim build (there is no implicit tie-break). Defaults to 0.
+    /// </summary>
+    int Order => 0;
+
+    /// <summary>
     /// Run the event's behaviour: read state through <paramref name="context"/> and <em>return</em> the
     /// declarative <see cref="Outcome"/>s to apply, in order (D-0017). The event never mutates state
     /// directly; an empty list means "do nothing".
