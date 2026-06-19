@@ -25,6 +25,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- The committed sample $data map (MapSerializerTests reads it at runtime). -->
+    <None Include="Fixtures/sample-map.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\MonoRpgMaker.Abstractions\MonoRpgMaker.Abstractions.csproj" />
     <ProjectReference Include="..\..\src\MonoRpgMaker.Engine\MonoRpgMaker.Engine.csproj" />
     <!-- Plain library reference (NOT OutputItemType=Analyzer): the tests instantiate the analyzer and
