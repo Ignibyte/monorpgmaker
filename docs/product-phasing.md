@@ -107,7 +107,7 @@ This file is the *map of intent*; the slice-by-slice "how" lives in the pipeline
 | Capability | Status | Notes |
 |---|---|---|
 | Headless map-edit ops (`MapEditor` paint/clear) | ✅ | unit + mutation tested |
-| Visual **map paint** editor (MonoGame/Avalonia front-end) | ⬜ | planned (technical-architecture); a later phase, after the runtime proves out |
+| Visual **map paint** editor (Avalonia — `MonoRpgMaker.Studio`) | 🟡 | first cut (#16): Tiled-like LPC sprite painting + New/Save/Load `$data`; one fixed tileset, plain index paint; autotiles/layers/multi-tileset deferred. Avalonia locked (D-0022) |
 | Visual **database** editor (items/actors/skills/enemies) | ⬜ | planned |
 | Event **placement + trigger** UI (light-UI; Tiled-template GUID identity) | ⬜ | planned; *what it runs* stays agentic |
 | `.expect` **semantic-acceptance grid** (human fill-in) | 🟡 | the contract + runner exist (#10); authoring is manual text today, a grid later |

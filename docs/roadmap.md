@@ -165,6 +165,11 @@ The **Modules panel** (the honest successor to MZ's Plugin Manager — a cycle i
 silent runtime break) plus the inspector (brought forward to P3) complete the GUI. The old "event
 editor" pillar is **replaced** by agentic authoring (D-0011).
 
+**Shipped (first slice):** a Tiled-like **map-paint editor** — `MonoRpgMaker.Studio` (Avalonia; #16) — paints
+LPC sprite tiles onto a `$data` map (a `Tileset` sheet model + `MapPaintSession`; New / Save / Load via
+`MapSerializer`). **Avalonia is locked as the GUI framework (D-0022)**; the studio is a thin host over the gated
+Editor logic. The database editor, Modules panel, and inspector follow.
+
 ## Cross-cutting
 
 - All game logic in `MonoRpgMaker.Engine` (framework-thin); sim deterministic (injected `IRandom`,

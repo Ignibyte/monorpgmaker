@@ -14,8 +14,9 @@
 |---|---|---|
 | `MonoRpgMaker.Engine` | class library | The runtime engine: world model, entities, data, the MonoGame host. The one assembly both the player and editor depend on. |
 | `MonoRpgMaker.Player` | desktop GL app | Boots an authored project through the engine. The shipped executable. |
-| `MonoRpgMaker.Editor` | class library (GUI later) | The maker tool. Today: headless, unit-testable editing operations. Later: a MonoGame/Avalonia front-end. |
-| `MonoRpgMaker.Engine.Tests` | xUnit | Engine unit tests. |
+| `MonoRpgMaker.Editor` | class library | The maker tool's tested logic: headless editing ops (`MapEditor`) + the map-paint view-model (`Tileset`, `MapPaintSession`). Gated (coverage + mutation). |
+| `MonoRpgMaker.Studio` | Avalonia desktop app | The maker **GUI** (D-0022). First slice: a Tiled-like map-paint editor. A thin `[ExcludeFromCodeCoverage]` host over the Editor's logic; stays MonoGame-free. |
+| `MonoRpgMaker.Engine.Tests` | xUnit | Engine + Editor unit/mutation tests. |
 
 Shared MSBuild settings live in `Directory.Build.props` (nullable on, explicit
 usings, latest C#) so the quality gate can tighten rules in one place.
@@ -35,7 +36,12 @@ The engine is organised by namespace, not by layer:
 
 Engine types intentionally expose a few MonoGame value types (e.g. `Point`) in
 their public API, so consumers (Player, Editor, tests) reference MonoGame
-directly rather than receiving it transitively.
+directly rather than receiving it transitively. The exception is
+`MonoRpgMaker.Studio` (the Avalonia host), which stays **MonoGame-free**: its
+view-model (`MapPaintSession`) exposes a framework-neutral surface
+(`Cell`/`int`/`Tile`), so the host never references MonoGame (D-0022). This works
+because Engine/Editor reference MonoGame with `PrivateAssets=All`, so it does not
+flow to a consumer that doesn't ask for it.
 
 ## Why MonoGame
 

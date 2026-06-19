@@ -12,6 +12,27 @@ executable correctness contracts, the generator/validator split, additive seam k
 open-source positioning) — see [agentic-substrate.md](agentic-substrate.md) and
 [agentic-strategy.md](agentic-strategy.md).
 Decision D-0021 (2026-06-17) sets the bundled-asset license policy.
+Decision D-0022 (2026-06-19) locks the maker-tool GUI framework (Avalonia).
+
+---
+
+## D-0022 — Avalonia is the maker-tool GUI framework; the studio is a thin host over tested editor logic
+
+**Decision:** The monorpgmaker **maker-tool GUI is built in [Avalonia](https://avaloniaui.net)** (XAML desktop).
+The first GUI shipped is `MonoRpgMaker.Studio` — a Tiled-like **map-paint editor** (#16). The studio is a thin
+`[ExcludeFromCodeCoverage]` **host** (the Player pattern): all testable logic — the `Tileset` sheet model and the
+`MapPaintSession` (pointer→cell, palette, paint, new/save/load over `MapSerializer`) — lives in the gated
+`MonoRpgMaker.Editor` and carries the coverage + mutation floors; the Avalonia view (window, `MapCanvas`,
+`TilePalette`) is excluded and not test-referenced. The host stays **MonoGame-free**: `MapPaintSession` exposes a
+framework-neutral surface (`Cell`/`int`/`Tile`), never a MonoGame `Point`, because Engine/Editor reference
+MonoGame with `PrivateAssets=All` (it does not flow to a consumer). Tileset sheets ship as `AvaloniaResource`
+(`avares://`).
+
+**Why:** Avalonia's native widgets scale to the rest of the maker GUI the roadmap calls for — the ~16-category
+database editor, the Modules panel, the inspector — where an immediate-mode UI would strain. Resolves the
+long-open "MonoGame/Avalonia later" placeholder. The host/logic split keeps the GUI honest under the gate (the UI
+cannot hide untested branching — see PR-claude-editor-view-math-into-tested-layer-001) and the neutral boundary
+keeps the maker tool independent of the runtime's rendering framework.
 
 ---
 
