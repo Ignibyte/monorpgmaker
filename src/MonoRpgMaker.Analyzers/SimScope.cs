@@ -82,4 +82,53 @@ internal static class SimScope
 
         return false;
     }
+
+    /// <summary>
+    /// Whether <paramref name="symbol"/> bears <paramref name="attribute"/>. Used to detect a
+    /// <c>[StateMutator]</c>-marked method at a call site (D-0017).
+    /// </summary>
+    internal static bool HasAttribute(ISymbol symbol, INamedTypeSymbol attribute)
+    {
+        foreach (AttributeData data in symbol.GetAttributes())
+        {
+            if (SymbolEqualityComparer.Default.Equals(data.AttributeClass, attribute))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Whether <paramref name="symbol"/> — or any symbol enclosing it — is a method returning
+    /// <c>IReadOnlyList&lt;Outcome&gt;</c>, i.e. an outcome-returning handler (D-0017). For an invocation
+    /// the containing symbol is already the enclosing member, so a call inside a handler's local function
+    /// or lambda still resolves to the handler; the chain walk additionally rejects call sites whose
+    /// containing symbol is a non-handler member (e.g. a field-initializer lambda → its field).
+    /// </summary>
+    internal static bool IsInsideOutcomeHandler(
+        ISymbol? symbol, INamedTypeSymbol readOnlyListDefinition, INamedTypeSymbol outcome)
+    {
+        for (ISymbol? current = symbol; current is not null; current = current.ContainingSymbol)
+        {
+            if (current is IMethodSymbol method &&
+                ReturnsOutcomeList(method.ReturnType, readOnlyListDefinition, outcome))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /// <summary>Whether <paramref name="returnType"/> is the constructed <c>IReadOnlyList&lt;Outcome&gt;</c>.</summary>
+    private static bool ReturnsOutcomeList(
+        ITypeSymbol returnType, INamedTypeSymbol readOnlyListDefinition, INamedTypeSymbol outcome)
+    {
+        return returnType is INamedTypeSymbol named
+            && SymbolEqualityComparer.Default.Equals(named.OriginalDefinition, readOnlyListDefinition)
+            && named.TypeArguments.Length == 1
+            && SymbolEqualityComparer.Default.Equals(named.TypeArguments[0], outcome);
+    }
 }
