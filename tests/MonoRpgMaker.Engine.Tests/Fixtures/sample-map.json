@@ -1,0 +1,12 @@
+{
+  "width": 3,
+  "height": 2,
+  "tiles": [
+    { "tilesetId": 1, "blocking": true },
+    { "tilesetId": 0, "blocking": false },
+    { "tilesetId": 1, "blocking": true },
+    { "tilesetId": 1, "blocking": true },
+    { "tilesetId": 2, "blocking": false },
+    { "tilesetId": 1, "blocking": true }
+  ]
+}

@@ -85,8 +85,10 @@ generator, NO Abstractions assembly, NO replay-hash gate):
 > `WORK-p0-scaffolder`): `monorpg scaffold event <Name>` on the Editor CLI deterministically emits a
 > gate-clean-by-construction handler skeleton (sealed `IMapEvent`, `Run → IReadOnlyList<Outcome>`, `// fill:`
 > holes) + a co-located `.expect` stub — proven gate-clean (the rendered `.cs` compiles + is MRM-clean, the
-> `.expect` parses). **Remaining P0:** a real content/`$data` format + the generator/validator DAG (the rest of
-> the by-construction emitters) below.
+> `.expect` parses). **The `$data` map format landed** (#12 / `WORK-p0-map-data`): a JSON `TileMap` `$data`
+> format + a pure deterministic `MapSerializer` (STJ source-gen; a total typed `MapLoadResult`; the host owns
+> file IO) — v1 is the tile map. **Remaining P0:** placed-events + the database from `$data` + the
+> generator/validator DAG (the rest of the by-construction emitters) below.
 
 - `MonoRpgMaker.Abstractions`; the **`FixedPoint` (Q16.16)** primitive as the *only* sim numeric type.
 - **Generator/validator split:** a Roslyn generator that does ONLY dumb, syntax-keyed emit and ALWAYS

@@ -136,9 +136,12 @@ locked next; the rest is a proposed order the user can resequence.
    new handlers cheap + correct-by-construction — the "AI builds the shape, you fill the thinking"
    leverage. Reuses #7–#10; adds a `scaffold` verb to the `monorpg` CLI.
 
-2. **#12 — Content / `$data` format + map loading.** *Foundation; medium–large.* A serializable map +
-   database format; load a map (its tiles, placed events, and the database) from data instead of the
-   hand-wired `TracerRoom`. Unblocks multiple maps + transitions, the visual editor, and save/load.
+2. **#12 — Content / `$data` format + map loading. ✅ DONE (v1: the tile map).** A serializable JSON
+   `$data` `TileMap` format + a pure deterministic `MapSerializer` in `Engine.World` (STJ source-gen; a
+   total typed `MapLoadResult` that never throws on parse; int/bool ⇒ replay bit-identical) + a committed
+   sample; proven by round-trip (incl. the real `TracerRoom` map) + malformed→typed-error + sample-load. The
+   host owns file IO. **Deferred follow-ups:** placed-events + the database from `$data`; the `TracerRoom`
+   runtime rewire to load its map from `$data`.
 
 3. **#13 — Trigger kinds + the ordered hook lifecycle.** *Extensibility spine; medium.* Expand
    `EventTrigger` beyond `StepOn` (action-button / autorun / parallel); introduce ordered-subscriber
