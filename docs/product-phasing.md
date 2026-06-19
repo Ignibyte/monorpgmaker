@@ -74,7 +74,7 @@ This file is the *map of intent*; the slice-by-slice "how" lives in the pipeline
 | Capability | Status | Notes |
 |---|---|---|
 | `monorpg` CLI host | 🟡 | exists as the Editor Exe (the `check-expectations` verb, #10); more verbs to come |
-| Scaffolder (`monorpg scaffold <kind>`) — gate-clean-by-construction skeletons + `.expect` stub | ⬜ | **recommended next slice** — ties #7/#8/#9/#10 together |
+| Scaffolder (`monorpg scaffold event <Name>`) — gate-clean-by-construction skeleton + `.expect` stub | ✅ | #11 — emits a sealed `IMapEvent` + `.expect` stub; the rendered `.cs` compiles + is MRM-clean (proven). v1 = the `event` kind |
 | Generator (dumb syntax-keyed emit; always a compilable degraded composition) | 🔒 | D-0018; premature until there are multi-module compositions |
 | Validator (`monorpg validate` — DAG, topo-sort, `contract-manifest.json`, `MRM0001–0005`) | 🔒 | D-0018; premature until there's a module dependency graph |
 | Skills/fixtures derived 1:1 from gate-clean goldens | ⬜ | |
@@ -130,7 +130,7 @@ The arc: **enabler → foundation → extensibility → entity → persistence.*
 and moves toward the "stateful entities + agent-authored modules" vision. Only #11 is the clear
 locked next; the rest is a proposed order the user can resequence.
 
-1. **#11 — Scaffolder (`monorpg scaffold event <Name>`).** *Ready now; small–medium.* A deterministic
+1. **#11 — Scaffolder (`monorpg scaffold event <Name>`). ✅ DONE.** A deterministic
    `{{var}}` emitter that mirrors a committed gate-clean fixture → an event-handler skeleton (returns
    `IReadOnlyList<Outcome>`, reads the context, `// fill:` holes) + a co-located `.expect` stub. Makes
    new handlers cheap + correct-by-construction — the "AI builds the shape, you fill the thinking"
