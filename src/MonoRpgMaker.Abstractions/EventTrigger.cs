@@ -5,4 +5,7 @@ public enum EventTrigger
 {
     /// <summary>Fires when the player steps onto the event's cell.</summary>
     StepOn,
+
+    /// <summary>Fires when the player presses the action button while facing the event's cell.</summary>
+    ActionButton,
 }

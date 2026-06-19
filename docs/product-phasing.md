@@ -85,7 +85,7 @@ This file is the *map of intent*; the slice-by-slice "how" lives in the pipeline
 | Tile map (grid; tile = tileset id + collision flag) | 🟡 | one hand-built room; no multi-map, layers, or transitions |
 | Tile/sprite rendering | 🟡 | flat colored rectangles only — no real tileset/sprite images, no camera scroll |
 | Player movement (4-dir, collision vs tiles + doors) | ✅ | arrow keys; works |
-| Triggers | 🟡 | only `StepOn`; no action-button / autorun / parallel; no *authored* event placement data |
+| Triggers | 🟡 | #13 added `ActionButton` (faced-cell `PressAction`); autorun / parallel deferred; no *authored* event placement data yet |
 | Event behavior (what an event runs) | 🟡 | 2 hand-coded examples (lever, chest); not yet agent-authored / scaffolded |
 | Doors (switch-driven passability) | ✅ | the lever→door demo |
 | Switches + variables (`GameState`) | 🟡 | named bool switches + int counters; **no persistence** (resets each run) |
@@ -98,7 +98,7 @@ This file is the *map of intent*; the slice-by-slice "how" lives in the pipeline
 |---|---|---|
 | Behavior = agent-authored modules hooked into seams | 🟡 | the event seam proves the pattern; the general module/hook registry + tooling is embryonic |
 | Additive / layerable outcome vocabulary (one registry, not two) | 🟡 | the `Outcome` DU is additive (#8); P2 extends it with combat/effect cases |
-| Hook lifecycle (ordered subscribers; ambiguity = build error) | 🔒 | designed (agentic-substrate §2); not built |
+| Hook lifecycle (ordered subscribers; ambiguity = build error) | ✅ | #13 — `HookSchedule`: ascending-`Order` per (cell,trigger); equal order = a typed ambiguity error at `WorldSim.TryCreate`. The module-registration layer is still future |
 | Trait / effect spine (`IEffect` / `ITrait` / `IStateBehavior` / `IDamageFormula`) | ⬜ | P2 — "items extended to have other meanings" |
 | **Unified stateful entity** (everything = entity; composition; definition↔instance) | ⬜ | open direction — resolve the two forks above first; `Entity` base today is on-grid only |
 | Base-state-first / no-code baseline | 🔒 | principle (generator-always-compilable + visual surfaces); not yet deliverable |
@@ -143,10 +143,12 @@ locked next; the rest is a proposed order the user can resequence.
    host owns file IO. **Deferred follow-ups:** placed-events + the database from `$data`; the `TracerRoom`
    runtime rewire to load its map from `$data`.
 
-3. **#13 — Trigger kinds + the ordered hook lifecycle.** *Extensibility spine; medium.* Expand
-   `EventTrigger` beyond `StepOn` (action-button / autorun / parallel); introduce ordered-subscriber
-   hook dispatch where an ordering ambiguity / cycle is a **build error** (`MRM0001–0003`) — Drupal's
-   extensibility without its ordering hell.
+3. **#13 — Trigger kinds + the ordered hook lifecycle. ✅ DONE (v1).** Added `ActionButton` +
+   `WorldSim.PressAction` (faced cell) and an ordered, ambiguity-checked dispatch (`HookSchedule`:
+   ascending-`Order` per (cell,trigger); equal order = a typed ambiguity error at `WorldSim.TryCreate`;
+   `IMapEvent.Order` is a non-breaking default-interface member; replay stays bit-identical) — Drupal's
+   extensibility without its ordering hell. **Deferred:** autorun / parallel triggers; the module-registration
+   system.
 
 4. **#14 — Unified-entity model: AD + first cut.** *The big one; large, design-gated.* Write the
    architecture decision first (composition over inheritance · definition↔instance · capabilities as

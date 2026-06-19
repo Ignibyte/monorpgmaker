@@ -74,6 +74,9 @@ public static class TracerRoom
             new DoorRule(chestCell, ChestEvent.OpenedSwitch, ChestClosed, ChestOpen),
         };
 
-        return new WorldSim(map, player, events, doors);
+        // The tracer's events sit on distinct cells, so the schedule is never ambiguous — unwrap the
+        // known-good result (the guard throw is a programmer-error backstop, never hit at runtime).
+        var result = WorldSim.TryCreate(map, player, events, doors);
+        return result.Sim ?? throw new System.InvalidOperationException(result.Error);
     }
 }
