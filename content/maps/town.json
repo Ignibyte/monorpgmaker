@@ -1,0 +1,789 @@
+{
+  "width": 16,
+  "height": 12,
+  "tiles": [
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 66,
+      "blocking": false
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    },
+    {
+      "tilesetId": 1,
+      "blocking": true
+    }
+  ],
+  "events": [
+    {
+      "id": "to-start",
+      "x": 12,
+      "y": 9,
+      "trigger": "StepOn",
+      "kind": "Warp",
+      "params": {
+        "map": "start",
+        "x": "2",
+        "y": "2"
+      }
+    }
+  ],
+  "tileset": "lpc-mountains"
+}

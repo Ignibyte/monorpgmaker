@@ -222,13 +222,19 @@ public class StartMapEventTests
     public void Events_IsWelcomeSign()
     {
         EventData[] events = StartMap.Events();
-        EventData sign = Assert.Single(events);
-        Assert.Equal("sign-welcome", sign.Id);
+        Assert.Equal(2, events.Length);
+
+        EventData sign = Assert.Single(events, e => e.Id == "sign-welcome");
         Assert.Equal(6, sign.X);
         Assert.Equal(4, sign.Y);
         Assert.Equal("ActionButton", sign.Trigger);
         Assert.Equal("ShowText", sign.Kind);
         Assert.Equal("Welcome to monorpgmaker! Use the arrow keys to explore.", sign.Params["text"]);
+
+        EventData warp = Assert.Single(events, e => e.Id == "to-town");
+        Assert.Equal("Warp", warp.Kind);
+        Assert.Equal("StepOn", warp.Trigger);
+        Assert.Equal("town", warp.Params["map"]);
     }
 
     [Fact] // the happy path: LoadWorld materialises the events

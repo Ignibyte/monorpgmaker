@@ -9,14 +9,15 @@ using MonoRpgMaker.Engine.World;
 namespace MonoRpgMaker.Engine.Core;
 
 /// <summary>
-/// The MonoGame host for a running project: it renders a <see cref="WorldSim"/> through a player-following
-/// <see cref="Camera"/> and drives it from keyboard input. The host app supplies the scene to run and (via
-/// <see cref="SetTileset"/>) its tileset art.
+/// The MonoGame host for a running project: it renders the active map of a <see cref="GameSession"/> through a
+/// player-following <see cref="Camera"/> and drives it from keyboard input. The session owns the multi-map
+/// switch (a Warp swaps the active map); the host always renders <see cref="GameSession.Active"/>. The host app
+/// supplies the scene to run and (via <see cref="SetTileset"/>) its tileset art.
 /// </summary>
 /// <remarks>
 /// Excluded from coverage: the composition/host root owning the live MonoGame loop
 /// (window, GPU, input) with no unit-testable contract — the C# analogue of an
-/// excluded <c>main</c>. The simulation it drives (<see cref="WorldSim"/>) and the view
+/// excluded <c>main</c>. The simulation it drives (<see cref="GameSession"/>/<see cref="WorldSim"/>) and the view
 /// math (<see cref="Camera"/>, <see cref="Tileset"/>) are covered in their own tests.
 /// </remarks>
 [ExcludeFromCodeCoverage]
@@ -27,17 +28,17 @@ public class RpgGame : Game
     private const int ViewportTilesHigh = 15;
 
     private readonly GraphicsDeviceManager _graphics;
-    private readonly WorldSim _sim;
+    private readonly GameSession _session;
     private SpriteBatch? _spriteBatch;
     private Texture2D? _pixel;
     private Texture2D? _tileset;
     private Tileset? _tilesetInfo;
     private KeyboardState _previous;
 
-    /// <summary>Boot the host over the supplied simulation <paramref name="sim"/>.</summary>
-    public RpgGame(WorldSim sim)
+    /// <summary>Boot the host over the supplied <paramref name="session"/> (it owns the map set + transitions).</summary>
+    public RpgGame(GameSession session)
     {
-        _sim = sim;
+        _session = session;
         _graphics = new GraphicsDeviceManager(this)
         {
             PreferredBackBufferWidth = ViewportTilesWide * TileSize,
@@ -46,6 +47,9 @@ public class RpgGame : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
     }
+
+    /// <summary>The simulation for the map currently being played — re-evaluated each frame so a warp re-renders.</summary>
+    private WorldSim Sim => _session.Active;
 
     /// <inheritdoc />
     protected override void LoadContent()
@@ -62,8 +66,8 @@ public class RpgGame : Game
         _tilesetInfo = info;
     }
 
-    /// <summary>The catalog name of the running map's tileset — the host loads that sheet's art (the chosen sheet, not a hardcoded one).</summary>
-    protected string MapTilesetName => _sim.Map.TilesetName;
+    /// <summary>The catalog name of the active map's tileset — the host loads that sheet's art.</summary>
+    protected string MapTilesetName => Sim.Map.TilesetName;
 
     /// <inheritdoc />
     protected override void Update(GameTime gameTime)
@@ -109,10 +113,10 @@ public class RpgGame : Game
     private Point ViewOffset()
     {
         var playerPixel = new Point(
-            (_sim.Player.Cell.X * TileSize) + (TileSize / 2),
-            (_sim.Player.Cell.Y * TileSize) + (TileSize / 2));
+            (Sim.Player.Cell.X * TileSize) + (TileSize / 2),
+            (Sim.Player.Cell.Y * TileSize) + (TileSize / 2));
         var viewport = new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
-        var mapPixels = new Point(_sim.Map.Width * TileSize, _sim.Map.Height * TileSize);
+        var mapPixels = new Point(Sim.Map.Width * TileSize, Sim.Map.Height * TileSize);
         return Camera.ViewOffset(playerPixel, viewport, mapPixels);
     }
 
@@ -148,19 +152,19 @@ public class RpgGame : Game
 
     private void Step(Direction direction)
     {
-        _sim.MovePlayer(direction);
+        _session.MovePlayer(direction);
         UpdateTitle();
     }
 
     private void Act()
     {
-        _sim.PressAction();
+        _session.PressAction();
         UpdateTitle();
     }
 
     private void UpdateTitle()
     {
-        if (_sim.CurrentMessage is { } message)
+        if (Sim.CurrentMessage is { } message)
         {
             Window.Title = $"monorpgmaker — {message}";
             Debug.WriteLine(message);
@@ -173,7 +177,7 @@ public class RpgGame : Game
 
     private void DrawEventMarkers(SpriteBatch batch, Texture2D pixel)
     {
-        foreach (var cell in _sim.EventCells)
+        foreach (var cell in Sim.EventCells)
         {
             var inset = TileSize / 4;
             var rect = new Rectangle(
@@ -187,11 +191,11 @@ public class RpgGame : Game
 
     private void DrawMap(SpriteBatch batch, Texture2D pixel)
     {
-        for (var y = 0; y < _sim.Map.Height; y++)
+        for (var y = 0; y < Sim.Map.Height; y++)
         {
-            for (var x = 0; x < _sim.Map.Width; x++)
+            for (var x = 0; x < Sim.Map.Width; x++)
             {
-                Tile tile = _sim.Map.GetTile(new Point(x, y));
+                Tile tile = Sim.Map.GetTile(new Point(x, y));
                 if (_tileset is not null && _tilesetInfo is not null)
                 {
                     if (_tilesetInfo.TryGetSourceRect(tile.TilesetId, out SourceRect sr))
@@ -213,7 +217,7 @@ public class RpgGame : Game
 
     private void DrawPlayer(SpriteBatch batch, Texture2D pixel)
     {
-        var cell = _sim.Player.Cell;
+        var cell = Sim.Player.Cell;
         var inset = TileSize / 6;
         var rect = new Rectangle(
             (cell.X * TileSize) + inset,
@@ -225,7 +229,7 @@ public class RpgGame : Game
 
     private void DrawMessageBanner(SpriteBatch batch, Texture2D pixel)
     {
-        if (_sim.CurrentMessage is null)
+        if (Sim.CurrentMessage is null)
             return;
 
         var bannerHeight = TileSize;

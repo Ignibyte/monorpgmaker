@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,10 +20,10 @@ using MonoRpgMaker.Engine.World;
 namespace MonoRpgMaker.Studio;
 
 /// <summary>
-/// The studio's main window: a toolbar (New / Save / Load / Event mode / Blocking / tileset picker), the tileset
-/// palette, the map canvas, and an event inspector. A thin host — it loads the tileset sheet, owns file IO via
-/// the storage provider, and drives the pure <see cref="MapPaintSession"/> (it edits placement data; the runtime
-/// materialises behaviours); excluded from coverage.
+/// The studio's main window: a toolbar (New map / Save / Load / Event mode / Blocking / tileset picker), a map
+/// list (the multi-map set), the tileset palette, the map canvas, and a kind-aware event inspector. A thin host —
+/// it loads tileset sheets, owns file IO, and drives the pure <see cref="MapProject"/> (it edits placement data;
+/// the runtime materialises behaviours); excluded from coverage.
 /// </summary>
 [ExcludeFromCodeCoverage]
 public sealed class MainWindow : Window
@@ -32,74 +33,77 @@ public sealed class MainWindow : Window
     private const int DefaultWidth = 20;
     private const int DefaultHeight = 15;
 
-    private readonly MapPaintSession _session;
+    private readonly MapProject _project;
     private readonly MapCanvas _canvas;
     private readonly TilePalette _palette;
+    private readonly ListBox _mapList;
     private readonly TextBlock _status;
     private readonly ComboBox _triggerBox;
     private readonly ComboBox _kindBox;
     private readonly ComboBox _tilesetBox;
-    private readonly TextBox _textBox;
+    private readonly StackPanel _paramPanel;
     private readonly StackPanel _inspector;
     private readonly Button _undoButton;
     private readonly Button _redoButton;
+    private readonly Dictionary<string, Control> _paramControls = new(StringComparer.Ordinal);
+    private readonly EventHandler _historyHandler;
+    private MapPaintSession? _subscribedSession;
     private bool _refreshing;
 
-    /// <summary>Build the window, its controls, and a default session over the default LPC sheet.</summary>
+    /// <summary>Build the window, its controls, and a one-map project over the default LPC sheet.</summary>
     public MainWindow()
     {
         Title = "MonoRpgMaker Studio — Map Painter";
-        Width = 1100;
+        Width = 1180;
         Height = 760;
 
-        _session = new MapPaintSession(TilesetCatalog.DefaultName, DefaultWidth, DefaultHeight);
-        (Bitmap sheet, Tileset geometry) = LoadSheetFor(_session.ActiveTileset);
+        _project = new MapProject("start", DefaultWidth, DefaultHeight);
+        (Bitmap sheet, Tileset geometry) = LoadSheetFor(Session.ActiveTileset);
 
-        _canvas = new MapCanvas(_session, sheet, geometry, CellSize);
-        _palette = new TilePalette(_session, sheet, geometry);
+        _canvas = new MapCanvas(Session, sheet, geometry, CellSize);
+        _palette = new TilePalette(Session, sheet, geometry);
         _status = new TextBlock { VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0) };
+        _mapList = new ListBox { ItemsSource = _project.MapIds.ToList(), SelectedItem = _project.ActiveId, Width = 150 };
 
         _triggerBox = new ComboBox { ItemsSource = new[] { "StepOn", "ActionButton" }, HorizontalAlignment = HorizontalAlignment.Stretch };
         _kindBox = new ComboBox { ItemsSource = MapPaintSession.AvailableKinds.Select(k => k.Name).ToArray(), HorizontalAlignment = HorizontalAlignment.Stretch };
-        _textBox = new TextBox { AcceptsReturn = true, MinHeight = 80, TextWrapping = TextWrapping.Wrap };
+        _paramPanel = new StackPanel { Spacing = 4 };
         _inspector = BuildInspector();
         _canvas.EventChanged += (_, _) => RefreshInspector();
 
-        // The tileset picker — its options ARE the single-source catalog (MapPaintSession.AvailableTilesets), so
-        // the editor can never offer a sheet the runtime cannot materialise. SelectedItem is set before the
-        // handler is wired so the initial selection does not fire a redundant reload.
         _tilesetBox = new ComboBox
         {
             ItemsSource = MapPaintSession.AvailableTilesets.Select(t => t.Name).ToArray(),
-            SelectedItem = _session.ActiveTileset,
+            SelectedItem = Session.ActiveTileset,
             VerticalAlignment = VerticalAlignment.Center,
         };
         _tilesetBox.SelectionChanged += (_, _) => OnTilesetPicked();
 
         _undoButton = new Button { Content = "Undo", IsEnabled = false };
-        _undoButton.Click += (_, _) => _session.Undo();
+        _undoButton.Click += (_, _) => Session.Undo();
         _redoButton = new Button { Content = "Redo", IsEnabled = false };
-        _redoButton.Click += (_, _) => _session.Redo();
-        _session.HistoryChanged += (_, _) => RefreshHistory();
+        _redoButton.Click += (_, _) => Session.Redo();
+        _historyHandler = (_, _) => RefreshHistory();
+        _subscribedSession = Session;
+        Session.HistoryChanged += _historyHandler;
         KeyDown += OnKeyDown;
+
+        _mapList.SelectionChanged += (_, _) => OnMapSelected();
 
         var blocking = new CheckBox { Content = "Blocking", VerticalAlignment = VerticalAlignment.Center };
         _palette.BlockingProvider = () => blocking.IsChecked == true;
-        _palette.TileSelected += (_, _) => _status.Text = $"Active tile #{_session.Active.TilesetId}";
+        _palette.TileSelected += (_, _) => _status.Text = $"Active tile #{Session.Active.TilesetId}";
 
         Content = BuildLayout(_palette, blocking);
-        _status.Text = $"{_session.ActiveTileset} · {DefaultWidth}×{DefaultHeight} map";
+        _status.Text = $"{_project.MapCount} map(s) · active '{_project.ActiveId}' · {Session.ActiveTileset}";
     }
+
+    private MapPaintSession Session => _project.Active;
 
     private DockPanel BuildLayout(TilePalette palette, CheckBox blocking)
     {
-        var newButton = new Button { Content = "New" };
-        newButton.Click += (_, _) =>
-        {
-            _session.NewMap(DefaultWidth, DefaultHeight);
-            _canvas.SetSession(_session);
-            _status.Text = "New map";
-        };
+        var newMap = new Button { Content = "New map" };
+        newMap.Click += (_, _) => OnNewMap();
 
         var saveButton = new Button { Content = "Save" };
         saveButton.Click += async (_, _) => await SaveAsync();
@@ -120,7 +124,7 @@ public sealed class MainWindow : Window
         };
 
         var toolbar = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6, Margin = new Thickness(6) };
-        toolbar.Children.Add(newButton);
+        toolbar.Children.Add(newMap);
         toolbar.Children.Add(saveButton);
         toolbar.Children.Add(loadButton);
         toolbar.Children.Add(_undoButton);
@@ -130,6 +134,10 @@ public sealed class MainWindow : Window
         toolbar.Children.Add(new TextBlock { Text = "Tileset", VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 2, 0) });
         toolbar.Children.Add(_tilesetBox);
         toolbar.Children.Add(_status);
+
+        var mapsPanel = new StackPanel { Width = 150, Margin = new Thickness(6) };
+        mapsPanel.Children.Add(new TextBlock { Text = "Maps", FontWeight = FontWeight.Bold, Margin = new Thickness(0, 0, 0, 4) });
+        mapsPanel.Children.Add(_mapList);
 
         var paletteScroll = new ScrollViewer
         {
@@ -155,13 +163,62 @@ public sealed class MainWindow : Window
 
         var layout = new DockPanel();
         DockPanel.SetDock(toolbar, Dock.Top);
+        DockPanel.SetDock(mapsPanel, Dock.Left);
         DockPanel.SetDock(paletteScroll, Dock.Left);
         DockPanel.SetDock(inspectorScroll, Dock.Right);
         layout.Children.Add(toolbar);
+        layout.Children.Add(mapsPanel);
         layout.Children.Add(paletteScroll);
         layout.Children.Add(inspectorScroll);
         layout.Children.Add(canvasScroll);
         return layout;
+    }
+
+    private void OnNewMap()
+    {
+        string id = "map-" + (_project.MapCount + 1).ToString(CultureInfo.InvariantCulture);
+        if (!_project.NewMap(id, DefaultWidth, DefaultHeight))
+        {
+            return;
+        }
+
+        RebindActiveSession();
+        _mapList.ItemsSource = _project.MapIds.ToList();
+        _refreshing = true;
+        _mapList.SelectedItem = _project.ActiveId;
+        _refreshing = false;
+        _status.Text = $"New map '{id}'";
+    }
+
+    private void OnMapSelected()
+    {
+        if (_refreshing || _mapList.SelectedItem is not string id || id == _project.ActiveId)
+        {
+            return;
+        }
+
+        if (_project.SelectMap(id))
+        {
+            RebindActiveSession();
+            _status.Text = $"Editing '{id}'";
+        }
+    }
+
+    // After a map switch / new map: re-point the canvas + palette at the new active session, reload its sheet,
+    // move the undo/redo subscription to it, and sync the tileset picker + buttons + inspector.
+    private void RebindActiveSession()
+    {
+        _canvas.SetSession(Session);
+        _palette.SetSession(Session);
+        if (_subscribedSession is not null)
+        {
+            _subscribedSession.HistoryChanged -= _historyHandler;
+        }
+
+        Session.HistoryChanged += _historyHandler;
+        _subscribedSession = Session;
+        SyncTilesetTo(Session.ActiveTileset);
+        RefreshHistory();
     }
 
     private void OnTilesetPicked()
@@ -171,7 +228,7 @@ public sealed class MainWindow : Window
             return;
         }
 
-        if (_session.SelectTileset(name))
+        if (Session.SelectTileset(name))
         {
             ApplySheet(name);
             _status.Text = $"Tileset: {name}";
@@ -185,19 +242,16 @@ public sealed class MainWindow : Window
         _palette.SetSheet(sheet, geometry);
     }
 
-    // Reflect the undo/redo state after any history change: enable/disable the buttons, repaint the canvas
-    // (undo/redo mutate the map), and refresh the inspector (selection is cleared on undo/redo).
     private void RefreshHistory()
     {
-        _undoButton.IsEnabled = _session.CanUndo;
-        _redoButton.IsEnabled = _session.CanRedo;
+        _undoButton.IsEnabled = Session.CanUndo;
+        _redoButton.IsEnabled = Session.CanRedo;
         _canvas.InvalidateVisual();
         RefreshInspector();
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
-        // Control on Windows/Linux, Meta (⌘) on macOS.
         bool modifier = e.KeyModifiers.HasFlag(KeyModifiers.Control) || e.KeyModifiers.HasFlag(KeyModifiers.Meta);
         if (!modifier)
         {
@@ -207,12 +261,12 @@ public sealed class MainWindow : Window
         bool shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
         if (e.Key == Key.Z && !shift)
         {
-            _session.Undo();
+            Session.Undo();
             e.Handled = true;
         }
         else if (e.Key == Key.Y || (e.Key == Key.Z && shift))
         {
-            _session.Redo();
+            Session.Redo();
             e.Handled = true;
         }
     }
@@ -220,13 +274,12 @@ public sealed class MainWindow : Window
     private StackPanel BuildInspector()
     {
         _triggerBox.SelectionChanged += (_, _) => ApplyInspector();
-        _kindBox.SelectionChanged += (_, _) => ApplyInspector();
-        _textBox.LostFocus += (_, _) => ApplyInspector();
+        _kindBox.SelectionChanged += (_, _) => OnKindChanged();
 
         var delete = new Button { Content = "Delete event", HorizontalAlignment = HorizontalAlignment.Stretch };
         delete.Click += (_, _) =>
         {
-            if (_session.RemoveSelected())
+            if (Session.RemoveSelected())
             {
                 _canvas.InvalidateVisual();
                 RefreshInspector();
@@ -239,23 +292,72 @@ public sealed class MainWindow : Window
         panel.Children.Add(_triggerBox);
         panel.Children.Add(new TextBlock { Text = "Kind" });
         panel.Children.Add(_kindBox);
-        panel.Children.Add(new TextBlock { Text = "Text" });
-        panel.Children.Add(_textBox);
+        panel.Children.Add(_paramPanel);
         panel.Children.Add(delete);
         return panel;
     }
+
+    // Rebuild the param fields to exactly the selected kind's ParamKeys (the single source — BehaviourRegistry's
+    // descriptor — so the editor can never offer a field the runtime won't read), then apply.
+    private void OnKindChanged()
+    {
+        RebuildParamFields();
+        ApplyInspector();
+    }
+
+    private void RebuildParamFields()
+    {
+        _paramPanel.Children.Clear();
+        _paramControls.Clear();
+
+        string kind = _kindBox.SelectedItem as string ?? "ShowText";
+        IReadOnlyList<string> paramKeys = MapPaintSession.AvailableKinds.FirstOrDefault(k => k.Name == kind)?.ParamKeys ?? [];
+        foreach (string key in paramKeys)
+        {
+            _paramPanel.Children.Add(new TextBlock { Text = ParamLabel(key) });
+            Control control = key == "map"
+                ? new ComboBox { ItemsSource = _project.MapIds.ToList(), HorizontalAlignment = HorizontalAlignment.Stretch }
+                : new TextBox { AcceptsReturn = key == "text", MinHeight = key == "text" ? 80 : 0, TextWrapping = TextWrapping.Wrap };
+            if (control is ComboBox combo)
+            {
+                combo.SelectionChanged += (_, _) => ApplyInspector();
+            }
+            else if (control is TextBox box)
+            {
+                box.LostFocus += (_, _) => ApplyInspector();
+            }
+
+            _paramControls[key] = control;
+            _paramPanel.Children.Add(control);
+        }
+    }
+
+    private static string ParamLabel(string key) => key switch
+    {
+        "text" => "Text",
+        "map" => "Target map",
+        "x" => "Target X",
+        "y" => "Target Y",
+        _ => key,
+    };
 
     private void RefreshInspector()
     {
         _refreshing = true;
         try
         {
-            if (_session.SelectedEvent is { } selected)
+            if (Session.SelectedEvent is { } selected)
             {
                 _inspector.IsVisible = true;
                 _triggerBox.SelectedItem = selected.Trigger;
                 _kindBox.SelectedItem = selected.Kind;
-                _textBox.Text = selected.Params.TryGetValue("text", out string? text) ? text : string.Empty;
+                RebuildParamFields();
+                foreach (KeyValuePair<string, Control> entry in _paramControls)
+                {
+                    string value = selected.Params.TryGetValue(entry.Key, out string? v) ? v : string.Empty;
+                    SetControlValue(entry.Value, value);
+                }
+
                 _status.Text = $"Event {selected.Id} at ({selected.Cell.X}, {selected.Cell.Y})";
             }
             else
@@ -271,17 +373,42 @@ public sealed class MainWindow : Window
 
     private void ApplyInspector()
     {
-        if (_refreshing || _session.SelectedEvent is null)
+        if (_refreshing || Session.SelectedEvent is null)
         {
             return;
         }
 
         string trigger = _triggerBox.SelectedItem as string ?? "ActionButton";
         string kind = _kindBox.SelectedItem as string ?? "ShowText";
-        var parameters = new Dictionary<string, string> { ["text"] = _textBox.Text ?? string.Empty };
-        _session.UpdateSelected(trigger, kind, parameters);
+        var parameters = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (KeyValuePair<string, Control> entry in _paramControls)
+        {
+            parameters[entry.Key] = ControlValue(entry.Value);
+        }
+
+        Session.UpdateSelected(trigger, kind, parameters);
         _canvas.InvalidateVisual();
     }
+
+    private static void SetControlValue(Control control, string value)
+    {
+        switch (control)
+        {
+            case ComboBox combo:
+                combo.SelectedItem = value;
+                break;
+            case TextBox box:
+                box.Text = value;
+                break;
+        }
+    }
+
+    private static string ControlValue(Control control) => control switch
+    {
+        ComboBox combo => combo.SelectedItem as string ?? string.Empty,
+        TextBox box => box.Text ?? string.Empty,
+        _ => string.Empty,
+    };
 
     private static (Bitmap Sheet, Tileset Geometry) LoadSheetFor(string name)
     {
@@ -297,27 +424,26 @@ public sealed class MainWindow : Window
         return new Bitmap(stream);
     }
 
+    // Save the whole map SET to a folder: game.json (the manifest) + one <id>.json per map — the layout the
+    // runtime embeds + reads.
     private async Task SaveAsync()
     {
         try
         {
-            IStorageFile? file = await StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
-            {
-                Title = "Save map $data",
-                SuggestedFileName = "map.json",
-                DefaultExtension = "json",
-                FileTypeChoices = new[] { MapFileType },
-            });
-
-            if (file is null)
+            var folders = await StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions { Title = "Save the map set to a folder" });
+            if (folders.Count == 0 || folders[0].TryGetLocalPath() is not { } dir)
             {
                 return;
             }
 
-            await using Stream stream = await file.OpenWriteAsync();
-            await using var writer = new StreamWriter(stream);
-            await writer.WriteAsync(_session.Save());
-            _status.Text = $"Saved {file.Name}";
+            SavedProject saved = _project.Save();
+            await File.WriteAllTextAsync(Path.Combine(dir, "game.json"), saved.Manifest);
+            foreach (KeyValuePair<string, string> map in saved.Maps)
+            {
+                await File.WriteAllTextAsync(Path.Combine(dir, map.Key + ".json"), map.Value);
+            }
+
+            _status.Text = $"Saved {saved.Maps.Count} map(s) + game.json to {dir}";
         }
         catch (IOException ex)
         {
@@ -325,13 +451,14 @@ public sealed class MainWindow : Window
         }
     }
 
+    // Load a single map's $data into the active map (a convenience over the existing session loader).
     private async Task LoadAsync()
     {
         try
         {
             var files = await StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
             {
-                Title = "Load map $data",
+                Title = "Load a map $data into the active map",
                 AllowMultiple = false,
                 FileTypeFilter = new[] { MapFileType },
             });
@@ -348,12 +475,13 @@ public sealed class MainWindow : Window
                 json = await reader.ReadToEndAsync();
             }
 
-            MapLoadResult result = _session.Load(json);
+            MapLoadResult result = Session.Load(json);
             if (result.Ok)
             {
-                _canvas.SetSession(_session);
-                SyncTilesetTo(_session.ActiveTileset);
-                _status.Text = $"Loaded {files[0].Name}";
+                _canvas.SetSession(Session);
+                SyncTilesetTo(Session.ActiveTileset);
+                RefreshHistory();
+                _status.Text = $"Loaded {files[0].Name} into '{_project.ActiveId}'";
             }
             else
             {
@@ -366,8 +494,6 @@ public sealed class MainWindow : Window
         }
     }
 
-    // Reflect a loaded map's tileset in the picker WITHOUT re-triggering SelectTileset (the guard), then load
-    // its sheet so the palette + canvas render the loaded art.
     private void SyncTilesetTo(string name)
     {
         _refreshing = true;

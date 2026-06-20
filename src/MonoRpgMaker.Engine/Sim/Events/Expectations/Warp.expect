@@ -1,0 +1,2 @@
+# Warp transitions the player to the target map + cell on its trigger.
+=> Warp("town", 3, 4)

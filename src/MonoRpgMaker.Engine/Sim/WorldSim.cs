@@ -21,15 +21,15 @@ public sealed class WorldSim
     private readonly OutcomeApplier _applier;
     private readonly List<GridPoint> _eventCells;
 
-    private WorldSim(TileMap map, Actor player, HookSchedule schedule, IEnumerable<DoorRule> doors)
+    private WorldSim(TileMap map, Actor player, GameState state, HookSchedule schedule, IEnumerable<DoorRule> doors)
     {
         Map = map;
         Player = player;
-        State = new GameState();
+        State = state;
         _schedule = schedule;
         _doors = new List<DoorRule>(doors);
         _eventContext = new EventContext(State);
-        _applier = new OutcomeApplier(State, message => CurrentMessage = message);
+        _applier = new OutcomeApplier(State, message => CurrentMessage = message, warp => PendingWarp = warp);
 
         _eventCells = new List<GridPoint>(schedule.Events.Count);
         foreach (IMapEvent mapEvent in schedule.Events)
@@ -49,7 +49,7 @@ public sealed class WorldSim
     /// order); the null-argument guards throw, as a null is a programmer error rather than bad data.
     /// </summary>
     public static WorldSimResult TryCreate(
-        TileMap map, Actor player, IEnumerable<IMapEvent> events, IEnumerable<DoorRule> doors)
+        TileMap map, Actor player, IEnumerable<IMapEvent> events, IEnumerable<DoorRule> doors, GameState? state = null)
     {
         ArgumentNullException.ThrowIfNull(map);
         ArgumentNullException.ThrowIfNull(player);
@@ -62,7 +62,7 @@ public sealed class WorldSim
             return WorldSimResult.Failure(built.Error!);
         }
 
-        return WorldSimResult.Success(new WorldSim(map, player, built.Schedule!, doors));
+        return WorldSimResult.Success(new WorldSim(map, player, state ?? new GameState(), built.Schedule!, doors));
     }
 
     /// <summary>The map being walked.</summary>
@@ -77,6 +77,9 @@ public sealed class WorldSim
     /// <summary>The message awaiting display, or null when none is active.</summary>
     public string? CurrentMessage { get; private set; }
 
+    /// <summary>The transition a fired event requested this step, or null when none — the sim-host reads it to switch maps (D-0017).</summary>
+    public Warp? PendingWarp { get; private set; }
+
     /// <summary>
     /// Try to step the player one tile. Clears any pending message first; on a successful step, fires
     /// step-on events at the new cell and re-syncs doors. Returns true when the player moved.
@@ -84,6 +87,7 @@ public sealed class WorldSim
     public bool MovePlayer(Direction direction)
     {
         CurrentMessage = null;
+        PendingWarp = null;
         if (!Player.TryStep(direction, Map))
         {
             return false;
@@ -102,6 +106,7 @@ public sealed class WorldSim
     public bool PressAction()
     {
         CurrentMessage = null;
+        PendingWarp = null;
         Point faced = Player.Cell + Player.Facing.ToStep();
         bool fired = FireHooks(faced, EventTrigger.ActionButton);
         SyncDoors();

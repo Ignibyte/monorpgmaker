@@ -12,7 +12,7 @@ public class OutcomeApplierTests
     {
         var state = new GameState();
         var messages = new List<string>();
-        return (new OutcomeApplier(state, messages.Add), state, messages);
+        return (new OutcomeApplier(state, messages.Add, static _ => { }), state, messages);
     }
 
     [Fact] // T4 — SetSwitch writes through to state, honoring Value (re-homes the dropped write-through assert)
@@ -96,10 +96,11 @@ public class OutcomeApplierTests
     {
         var state = new GameState();
 
-        Assert.Throws<ArgumentNullException>(() => new OutcomeApplier(null!, _ => { }));
-        Assert.Throws<ArgumentNullException>(() => new OutcomeApplier(state, null!));
+        Assert.Throws<ArgumentNullException>(() => new OutcomeApplier(null!, _ => { }, _ => { }));
+        Assert.Throws<ArgumentNullException>(() => new OutcomeApplier(state, null!, _ => { }));
+        Assert.Throws<ArgumentNullException>(() => new OutcomeApplier(state, _ => { }, null!));
 
-        var applier = new OutcomeApplier(state, _ => { });
+        var applier = new OutcomeApplier(state, _ => { }, _ => { });
         Assert.Throws<ArgumentNullException>(() => applier.Apply(null!));
     }
 }

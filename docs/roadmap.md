@@ -198,8 +198,17 @@ mountains (existing maps unchanged); unknown → a typed load failure.
 **Undo/redo (#21):** the third Studio-v2 slice — a command/history spine in the gated `MapPaintSession`: a paint
 **stroke**, each event op (place / edit / remove), and the tileset switch are undoable + redoable, with Undo/Redo
 toolbar buttons + Ctrl/⌘+Z (Ctrl+Shift+Z / Ctrl+Y for redo). Each undoable op records its inverse (a delta), and a
-batched stroke unwinds in reverse; `New`/`Load` reset the history. The remaining Studio-v2 slice (multi-map) + the
-agent-authored-kind flow follow.
+batched stroke unwinds in reverse; `New`/`Load` reset the history.
+
+**Multi-map + the built-in `Warp` (#22):** the Studio-v2 arc's finale *and* the start of the trigger program's
+Slice 2. The runtime now holds **many embedded maps** by id + a `game.json` manifest, and a new gated
+**`GameSession`** orchestrator switches the active map on a **`Warp`** event — loading the target, placing the
+player at the target cell, and carrying `$game` state across (D-0026). `Warp` is the first cross-map behaviour,
+built contract-first like `ShowText` (D-0024): a declarative `Warp` outcome the sim-host applies (D-0017). The
+Studio authors the set (a gated `MapProject` map list + a kind-aware, param-key-driven Warp inspector), and saves
+record the active map. With this the **Studio-v2 arc is complete** (event placement #19, tileset picker #20,
+undo/redo #21, multi-map #22); next is the rest of the built-in library (chest / door / shop / give-item) + the
+agent-authored-kind flow.
 
 ## Cross-cutting
 

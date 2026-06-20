@@ -2029,6 +2029,18 @@
       "params": {
         "text": "Welcome to monorpgmaker! Use the arrow keys to explore."
       }
+    },
+    {
+      "id": "to-town",
+      "x": 14,
+      "y": 9,
+      "trigger": "StepOn",
+      "kind": "Warp",
+      "params": {
+        "map": "town",
+        "x": "2",
+        "y": "2"
+      }
     }
   ],
   "tileset": "lpc-mountains"
