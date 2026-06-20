@@ -28,7 +28,7 @@ public sealed class SaveState
     /// <summary>The captured RNG generator state — restores an identical continuation.</summary>
     public ulong RngState { get; set; }
 
-    /// <summary>The id of the map the player is on (empty = the start map; back-compat for pre-multi-map saves).</summary>
+    /// <summary>The id of the map the player is on — the host writes the active map id. An empty/unknown id does not resolve on restore (<see cref="GameSession.TryRestore"/> returns false, leaving the session unchanged).</summary>
     public string MapId { get; set; } = string.Empty;
 }
 
