@@ -181,8 +181,15 @@ animation + multi-map deferred.)
 `kind` to an `IMapEvent` behaviour, and the first **built-in** `ShowText` (no-code dialogue) runs in the playable
 map — walk to the sign, press Space → the line shows. Built **contract-first**: every behaviour implements
 `IMapEvent` + carries a `.expect` (gate:13), built-in and future agent kinds interchangeable through the one
-registry. Next: the built-in library (chest/door/shop/warp), the Studio UI to *place* events, and the
-agent-authored custom behaviours.
+registry. Next: the built-in library (chest/door/shop/warp) and the agent-authored custom behaviours.
+
+**Event placement in the editor (#19):** the Studio UI to *place* events — the first slice of the **Studio-v2**
+arc. An **Event mode** in the map painter: click a tile to place/select an event, an inspector configures its
+trigger + kind + params (ShowText) + delete, and Save writes the same `$data` events (#18) the runtime loads +
+dispatches. Paint a map → place a sign → Save → run the Player → Space → your line (no more hand-edited JSON). The
+kind dropdown is the `BehaviourRegistry`'s **single descriptor** — the editor offers exactly what the runtime
+materialises, so they can't drift. The remaining Studio-v2 slices (a tileset picker, undo/redo, multi-map) + the
+agent-authored-kind flow follow.
 
 ## Cross-cutting
 

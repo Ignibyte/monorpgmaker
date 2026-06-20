@@ -15,16 +15,57 @@ namespace MonoRpgMaker.Engine.Sim;
 /// </summary>
 public static class BehaviourRegistry
 {
-    private static readonly Dictionary<string, Func<GridPoint, EventTrigger, IReadOnlyDictionary<string, string>, BehaviourResult>> Factories =
-        new(StringComparer.Ordinal)
-        {
-            ["ShowText"] = static (cell, trigger, p) =>
+    // The SINGLE source of truth for every behaviour kind: its name, its parameter keys, and its factory. The
+    // editor reads <see cref="Kinds"/> (name + param keys); the runtime reads <see cref="Factories"/> — both are
+    // derived from this one table, so the editor's options and the runtime's materialisation can never drift
+    // (D-0024). A new built-in (or a future agent kind) is one entry here.
+    private static readonly Registration[] Registrations =
+    [
+        new(
+            "ShowText",
+            ["text"],
+            static (cell, trigger, p) =>
                 p.TryGetValue("text", out string? text)
                     ? BehaviourResult.Success(new ShowTextEvent(cell, trigger, text))
-                    : BehaviourResult.Failure("ShowText requires a 'text' parameter"),
-        };
+                    : BehaviourResult.Failure("ShowText requires a 'text' parameter")),
+    ];
+
+    private static readonly Dictionary<string, Func<GridPoint, EventTrigger, IReadOnlyDictionary<string, string>, BehaviourResult>> Factories = BuildFactories();
 
     private static readonly IReadOnlyDictionary<string, string> EmptyParams = new Dictionary<string, string>(StringComparer.Ordinal);
+
+    /// <summary>
+    /// The registered behaviour kinds and their parameter keys — the single source an editor reads to offer the
+    /// kind list + its param fields, guaranteed to match what <see cref="TryMaterialize"/> accepts (D-0024).
+    /// </summary>
+    public static IReadOnlyList<BehaviourKindInfo> Kinds { get; } = BuildKinds();
+
+    private static Dictionary<string, Func<GridPoint, EventTrigger, IReadOnlyDictionary<string, string>, BehaviourResult>> BuildFactories()
+    {
+        var factories = new Dictionary<string, Func<GridPoint, EventTrigger, IReadOnlyDictionary<string, string>, BehaviourResult>>(StringComparer.Ordinal);
+        foreach (Registration registration in Registrations)
+        {
+            factories[registration.Name] = registration.Factory;
+        }
+
+        return factories;
+    }
+
+    private static List<BehaviourKindInfo> BuildKinds()
+    {
+        var kinds = new List<BehaviourKindInfo>(Registrations.Length);
+        foreach (Registration registration in Registrations)
+        {
+            kinds.Add(new BehaviourKindInfo(registration.Name, registration.ParamKeys));
+        }
+
+        return kinds;
+    }
+
+    private sealed record Registration(
+        string Name,
+        IReadOnlyList<string> ParamKeys,
+        Func<GridPoint, EventTrigger, IReadOnlyDictionary<string, string>, BehaviourResult> Factory);
 
     /// <summary>
     /// Materialise a placed <paramref name="placement"/> into its <see cref="IMapEvent"/> via its <c>kind</c>.
@@ -77,3 +118,13 @@ public sealed class BehaviourResult
     /// <summary>A failed materialisation carrying the <paramref name="error"/> reason.</summary>
     public static BehaviourResult Failure(string error) => new(null, error);
 }
+
+/// <summary>
+/// A behaviour kind an editor can offer: its registry <see cref="Name"/> and the parameter keys it expects
+/// (e.g. <c>ShowText</c> → <c>["text"]</c>). Exposed by <see cref="BehaviourRegistry.Kinds"/> as the single
+/// source the editor and the runtime registry share, so a placement authored in the editor always materialises
+/// (D-0024).
+/// </summary>
+/// <param name="Name">The behaviour kind's registry key.</param>
+/// <param name="ParamKeys">The parameter keys this kind reads (the fields an editor should offer).</param>
+public sealed record BehaviourKindInfo(string Name, IReadOnlyList<string> ParamKeys);
