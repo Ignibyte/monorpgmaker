@@ -77,18 +77,21 @@ public static class StartMap
         return result.Sim ?? throw new InvalidOperationException(result.Error);
     }
 
-    /// <summary>The town map — a second bundled room the start map warps to (proving the runtime map switch).</summary>
+    /// <summary>The town map — a second bundled room the start map warps to, on the <c>lpc-grass</c> tileset so the warp visibly RE-SKINS (proving the runtime map switch + the cross-map tileset reload).</summary>
     public static TileMap TownBuild()
     {
         const int width = 16;
         const int height = 12;
-        var map = new TileMap(width, height);
+        // Grass-sheet indices (lpc-grass is 18 tiles, 0–17 — the mountains Floor/Wall indices are out of range).
+        var grassFloor = new Tile(TilesetId: 4, Blocking: false);
+        var grassWall = new Tile(TilesetId: 0, Blocking: true);
+        var map = new TileMap(width, height) { TilesetName = "lpc-grass" };
         for (var y = 0; y < height; y++)
         {
             for (var x = 0; x < width; x++)
             {
                 var border = x == 0 || y == 0 || x == width - 1 || y == height - 1;
-                map.SetTile(new Point(x, y), border ? Wall : Floor);
+                map.SetTile(new Point(x, y), border ? grassWall : grassFloor);
             }
         }
 

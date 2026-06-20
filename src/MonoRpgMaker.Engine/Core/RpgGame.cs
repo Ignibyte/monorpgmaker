@@ -34,6 +34,7 @@ public class RpgGame : Game
     private Texture2D? _tileset;
     private Tileset? _tilesetInfo;
     private KeyboardState _previous;
+    private readonly TilesetTracker _tilesetTracker = new();
 
     /// <summary>Boot the host over the supplied <paramref name="session"/> (it owns the map set + transitions).</summary>
     public RpgGame(GameSession session)
@@ -69,6 +70,11 @@ public class RpgGame : Game
     /// <summary>The catalog name of the active map's tileset — the host loads that sheet's art.</summary>
     protected string MapTilesetName => Sim.Map.TilesetName;
 
+    /// <summary>Called when the active map's tileset changes (incl. the first frame) — the host reloads + applies the new sheet (D-0022; the engine never loads embedded resources itself).</summary>
+    protected virtual void OnTilesetChanged(string tilesetName)
+    {
+    }
+
     /// <inheritdoc />
     protected override void Update(GameTime gameTime)
     {
@@ -89,6 +95,12 @@ public class RpgGame : Game
         {
             base.Draw(gameTime);
             return;
+        }
+
+        // Re-skin when the active map's tileset changed (e.g. after a warp) — the host reloads the sheet (D-0022).
+        if (_tilesetTracker.TryAdvance(MapTilesetName))
+        {
+            OnTilesetChanged(MapTilesetName);
         }
 
         Point offset = ViewOffset();

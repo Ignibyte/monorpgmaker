@@ -496,6 +496,12 @@ public class MultiMapWarpTests
         Assert.Equal(12, town.Height);
     }
 
+    [Fact] // REQ-004 — the town uses the grass tileset, so the start⇄town warp visibly re-skins
+    public void StartMap_TownBuild_UsesGrassTileset()
+    {
+        Assert.Equal("lpc-grass", StartMap.TownBuild().TilesetName);
+    }
+
     [Fact] // the town border is blocking; the interior is floor (pins the build loop)
     public void StartMap_TownBuild_BorderBlocking_InteriorFloor()
     {

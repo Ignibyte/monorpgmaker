@@ -208,7 +208,9 @@ built contract-first like `ShowText` (D-0024): a declarative `Warp` outcome the 
 Studio authors the set (a gated `MapProject` map list + a kind-aware, param-key-driven Warp inspector), and saves
 record the active map. With this the **Studio-v2 arc is complete** (event placement #19, tileset picker #20,
 undo/redo #21, multi-map #22); next is the rest of the built-in library (chest / door / shop / give-item) + the
-agent-authored-kind flow.
+agent-authored-kind flow. A follow-up (#23) reloads the active map's tileset sheet on a warp (the host signals,
+`Game1` reloads through the catalog — D-0022/D-0025), so maps with different sheets re-skin: the bundled
+start⇄town warp now switches `lpc-mountains`⇄`lpc-grass`.
 
 ## Cross-cutting
 
