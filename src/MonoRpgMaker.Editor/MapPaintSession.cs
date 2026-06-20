@@ -27,7 +27,7 @@ public readonly record struct EventView(Cell Cell, string Id, string Trigger, st
 
 /// <summary>
 /// The Avalonia-free editing session behind the map painter: it holds the map under edit (via a
-/// <see cref="MapEditor"/>), the active paint <see cref="Tile"/>, and the <see cref="Tileset"/>, and
+/// <see cref="MapEditor"/>), the active paint <see cref="Tile"/>, and the active tileset name, and
 /// orchestrates new / paint / save / load over <see cref="MapSerializer"/> strings. Pure logic — no UI and no
 /// file IO — so the Studio host drives it and it stays fully unit-testable.
 /// </summary>
@@ -41,18 +41,14 @@ public sealed class MapPaintSession
 
     /// <summary>
     /// Start a session over a fresh <paramref name="width"/>×<paramref name="height"/> map that paints tiles
-    /// from <paramref name="tileset"/>.
+    /// from the catalog tileset named <paramref name="tilesetName"/> (an unknown name falls back to the catalog
+    /// default).
     /// </summary>
-    public MapPaintSession(Tileset tileset, int width, int height)
+    public MapPaintSession(string tilesetName, int width, int height)
     {
-        ArgumentNullException.ThrowIfNull(tileset);
-
-        Tileset = tileset;
         _editor = new MapEditor(new TileMap(width, height));
+        _editor.Map.TilesetName = TilesetCatalog.Contains(tilesetName) ? tilesetName : TilesetCatalog.DefaultName;
     }
-
-    /// <summary>The tileset whose tiles this session paints.</summary>
-    public Tileset Tileset { get; }
 
     /// <summary>
     /// The map currently under edit. Engine-internal — Avalonia hosts should read tiles via
@@ -64,6 +60,12 @@ public sealed class MapPaintSession
 
     /// <summary>The tile that <see cref="Paint"/> writes.</summary>
     public Tile Active => _active;
+
+    /// <summary>The catalog name of the active tileset — the sheet <see cref="Save"/> writes into the map's <c>$data</c>.</summary>
+    public string ActiveTileset => _editor.Map.TilesetName;
+
+    /// <summary>The tilesets a map may use — the single source shared with the runtime (the host's picker reads this).</summary>
+    public static IReadOnlyList<TilesetInfo> AvailableTilesets => TilesetCatalog.All;
 
     /// <summary>The map width in tiles.</summary>
     public int Width => _editor.Map.Width;
@@ -103,10 +105,28 @@ public sealed class MapPaintSession
     /// <summary>Paint the active tile at <paramref name="cell"/>; returns <see langword="false"/> (a no-op) when off-map.</summary>
     public bool Paint(Cell cell) => _editor.Paint(new Point(cell.X, cell.Y), _active);
 
-    /// <summary>Replace the map under edit with a fresh, all-empty <paramref name="width"/>×<paramref name="height"/> map (clears placed events).</summary>
+    /// <summary>
+    /// Switch the active tileset to the catalog member <paramref name="name"/>; returns <see langword="false"/>
+    /// (leaving the current tileset unchanged) when the name is not in the catalog. Painted indices are kept and
+    /// re-interpreted against the new sheet — an index past its tile count simply renders empty.
+    /// </summary>
+    public bool SelectTileset(string name)
+    {
+        if (!TilesetCatalog.Contains(name))
+        {
+            return false;
+        }
+
+        _editor.Map.TilesetName = name;
+        return true;
+    }
+
+    /// <summary>Replace the map under edit with a fresh, all-empty <paramref name="width"/>×<paramref name="height"/> map, keeping the active tileset (clears placed events).</summary>
     public void NewMap(int width, int height)
     {
+        string tileset = _editor.Map.TilesetName;
         _editor = new MapEditor(new TileMap(width, height));
+        _editor.Map.TilesetName = tileset;
         _events.Clear();
         _selected = null;
         _eventSeq = 0;

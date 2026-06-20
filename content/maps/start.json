@@ -2030,5 +2030,6 @@
         "text": "Welcome to monorpgmaker! Use the arrow keys to explore."
       }
     }
-  ]
+  ],
+  "tileset": "lpc-mountains"
 }

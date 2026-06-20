@@ -27,8 +27,8 @@
     <EmbeddedResource Include="..\..\content\maps\start.json">
       <LogicalName>start.json</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\..\assets\tilesets\lpc\lpc-mountains.png">
-      <LogicalName>lpc-mountains.png</LogicalName>
+    <EmbeddedResource Include="..\..\assets\tilesets\lpc\*.png">
+      <LogicalName>%(Filename)%(Extension)</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

@@ -26,6 +26,12 @@ public sealed class TileMap
     /// <summary>Map height in tiles.</summary>
     public int Height { get; }
 
+    /// <summary>
+    /// The catalog name of the tileset this map's <see cref="Tile.TilesetId"/> indices draw from. Defaults to
+    /// <see cref="TilesetCatalog.DefaultName"/> so a map built or loaded without an explicit reference stays valid.
+    /// </summary>
+    public string TilesetName { get; set; } = TilesetCatalog.DefaultName;
+
     /// <summary>True when <paramref name="cell"/> is inside the grid.</summary>
     public bool InBounds(Point cell) =>
         cell.X >= 0 && cell.Y >= 0 && cell.X < Width && cell.Y < Height;

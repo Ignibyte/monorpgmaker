@@ -39,7 +39,7 @@ public static class MapSerializer
             placed[i] = events[i];
         }
 
-        var data = new TileMapData { Width = map.Width, Height = map.Height, Tiles = tiles, Events = placed };
+        var data = new TileMapData { Width = map.Width, Height = map.Height, Tiles = tiles, Events = placed, Tileset = map.TilesetName };
         return JsonSerializer.Serialize(data, MapJsonContext.Default.TileMapData);
     }
 
@@ -89,7 +89,15 @@ public static class MapSerializer
             return MapLoadResult.Failure("tile count must equal width * height");
         }
 
-        var map = new TileMap(data.Width, data.Height);
+        // The tileset reference is optional: absent/empty defaults to the catalog default (existing maps stay
+        // valid); a name not in the catalog is a typed failure (the renderer must never be handed an unknown sheet).
+        string tilesetName = string.IsNullOrEmpty(data.Tileset) ? TilesetCatalog.DefaultName : data.Tileset;
+        if (!TilesetCatalog.Contains(tilesetName))
+        {
+            return MapLoadResult.Failure("unknown tileset '" + tilesetName + "'");
+        }
+
+        var map = new TileMap(data.Width, data.Height) { TilesetName = tilesetName };
         for (var y = 0; y < data.Height; y++)
         {
             for (var x = 0; x < data.Width; x++)

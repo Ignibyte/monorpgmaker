@@ -11,7 +11,7 @@ namespace MonoRpgMaker.Engine.Tests;
 /// <summary>Tests for the map editor's event-placement model (the gated <see cref="MapPaintSession"/> event API).</summary>
 public class MapPaintSessionEventTests
 {
-    private static MapPaintSession Session() => new(Tileset.FromSheet(384, 288, 32), 20, 15);
+    private static MapPaintSession Session() => new(TilesetCatalog.DefaultName, 20, 15);
 
     [Fact] // REQ-001 — a fresh placement carries the defaults
     public void AddEvent_PlacesWithDefaults()

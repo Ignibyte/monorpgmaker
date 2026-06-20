@@ -18,10 +18,10 @@ using MonoRpgMaker.Engine.World;
 namespace MonoRpgMaker.Studio;
 
 /// <summary>
-/// The studio's main window: a toolbar (New / Save / Load / Event mode / Blocking), the tileset palette, the map
-/// canvas, and an event inspector. A thin host — it loads the tileset sheet, owns file IO via the storage
-/// provider, and drives the pure <see cref="MapPaintSession"/> (it edits placement data; the runtime materialises
-/// behaviours); excluded from coverage.
+/// The studio's main window: a toolbar (New / Save / Load / Event mode / Blocking / tileset picker), the tileset
+/// palette, the map canvas, and an event inspector. A thin host — it loads the tileset sheet, owns file IO via
+/// the storage provider, and drives the pure <see cref="MapPaintSession"/> (it edits placement data; the runtime
+/// materialises behaviours); excluded from coverage.
 /// </summary>
 [ExcludeFromCodeCoverage]
 public sealed class MainWindow : Window
@@ -30,29 +30,30 @@ public sealed class MainWindow : Window
     private const int CellSize = 32;
     private const int DefaultWidth = 20;
     private const int DefaultHeight = 15;
-    private const string DefaultSheet = "lpc-mountains.png";
 
     private readonly MapPaintSession _session;
     private readonly MapCanvas _canvas;
+    private readonly TilePalette _palette;
     private readonly TextBlock _status;
     private readonly ComboBox _triggerBox;
     private readonly ComboBox _kindBox;
+    private readonly ComboBox _tilesetBox;
     private readonly TextBox _textBox;
     private readonly StackPanel _inspector;
     private bool _refreshing;
 
-    /// <summary>Build the window, its controls, and a default session over the LPC sheet.</summary>
+    /// <summary>Build the window, its controls, and a default session over the default LPC sheet.</summary>
     public MainWindow()
     {
         Title = "MonoRpgMaker Studio — Map Painter";
         Width = 1100;
         Height = 760;
 
-        Bitmap sheet = LoadSheet(DefaultSheet);
-        Tileset tileset = Tileset.FromSheet((int)sheet.Size.Width, (int)sheet.Size.Height, TileSize);
-        _session = new MapPaintSession(tileset, DefaultWidth, DefaultHeight);
+        _session = new MapPaintSession(TilesetCatalog.DefaultName, DefaultWidth, DefaultHeight);
+        (Bitmap sheet, Tileset geometry) = LoadSheetFor(_session.ActiveTileset);
 
-        _canvas = new MapCanvas(_session, sheet, CellSize);
+        _canvas = new MapCanvas(_session, sheet, geometry, CellSize);
+        _palette = new TilePalette(_session, sheet, geometry);
         _status = new TextBlock { VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0) };
 
         _triggerBox = new ComboBox { ItemsSource = new[] { "StepOn", "ActionButton" }, HorizontalAlignment = HorizontalAlignment.Stretch };
@@ -61,13 +62,23 @@ public sealed class MainWindow : Window
         _inspector = BuildInspector();
         _canvas.EventChanged += (_, _) => RefreshInspector();
 
-        var palette = new TilePalette(_session, sheet);
-        var blocking = new CheckBox { Content = "Blocking", VerticalAlignment = VerticalAlignment.Center };
-        palette.BlockingProvider = () => blocking.IsChecked == true;
-        palette.TileSelected += (_, _) => _status.Text = $"Active tile #{_session.Active.TilesetId}";
+        // The tileset picker — its options ARE the single-source catalog (MapPaintSession.AvailableTilesets), so
+        // the editor can never offer a sheet the runtime cannot materialise. SelectedItem is set before the
+        // handler is wired so the initial selection does not fire a redundant reload.
+        _tilesetBox = new ComboBox
+        {
+            ItemsSource = MapPaintSession.AvailableTilesets.Select(t => t.Name).ToArray(),
+            SelectedItem = _session.ActiveTileset,
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        _tilesetBox.SelectionChanged += (_, _) => OnTilesetPicked();
 
-        Content = BuildLayout(palette, blocking);
-        _status.Text = $"{tileset.TileCount} tiles · {DefaultWidth}×{DefaultHeight} map";
+        var blocking = new CheckBox { Content = "Blocking", VerticalAlignment = VerticalAlignment.Center };
+        _palette.BlockingProvider = () => blocking.IsChecked == true;
+        _palette.TileSelected += (_, _) => _status.Text = $"Active tile #{_session.Active.TilesetId}";
+
+        Content = BuildLayout(_palette, blocking);
+        _status.Text = $"{_session.ActiveTileset} · {DefaultWidth}×{DefaultHeight} map";
     }
 
     private DockPanel BuildLayout(TilePalette palette, CheckBox blocking)
@@ -104,6 +115,8 @@ public sealed class MainWindow : Window
         toolbar.Children.Add(loadButton);
         toolbar.Children.Add(eventMode);
         toolbar.Children.Add(blocking);
+        toolbar.Children.Add(new TextBlock { Text = "Tileset", VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 2, 0) });
+        toolbar.Children.Add(_tilesetBox);
         toolbar.Children.Add(_status);
 
         var paletteScroll = new ScrollViewer
@@ -137,6 +150,27 @@ public sealed class MainWindow : Window
         layout.Children.Add(inspectorScroll);
         layout.Children.Add(canvasScroll);
         return layout;
+    }
+
+    private void OnTilesetPicked()
+    {
+        if (_refreshing || _tilesetBox.SelectedItem is not string name)
+        {
+            return;
+        }
+
+        if (_session.SelectTileset(name))
+        {
+            ApplySheet(name);
+            _status.Text = $"Tileset: {name}";
+        }
+    }
+
+    private void ApplySheet(string name)
+    {
+        (Bitmap sheet, Tileset geometry) = LoadSheetFor(name);
+        _canvas.SetSheet(sheet, geometry);
+        _palette.SetSheet(sheet, geometry);
     }
 
     private StackPanel BuildInspector()
@@ -205,6 +239,13 @@ public sealed class MainWindow : Window
         _canvas.InvalidateVisual();
     }
 
+    private static (Bitmap Sheet, Tileset Geometry) LoadSheetFor(string name)
+    {
+        Bitmap sheet = LoadSheet(TilesetCatalog.ResolveResourceFile(name));
+        Tileset geometry = Tileset.FromSheet((int)sheet.Size.Width, (int)sheet.Size.Height, TileSize);
+        return (sheet, geometry);
+    }
+
     private static Bitmap LoadSheet(string fileName)
     {
         var uri = new Uri($"avares://MonoRpgMaker.Studio/Assets/{fileName}");
@@ -267,6 +308,7 @@ public sealed class MainWindow : Window
             if (result.Ok)
             {
                 _canvas.SetSession(_session);
+                SyncTilesetTo(_session.ActiveTileset);
                 _status.Text = $"Loaded {files[0].Name}";
             }
             else
@@ -278,6 +320,16 @@ public sealed class MainWindow : Window
         {
             _status.Text = $"Load failed: {ex.Message}";
         }
+    }
+
+    // Reflect a loaded map's tileset in the picker WITHOUT re-triggering SelectTileset (the guard), then load
+    // its sheet so the palette + canvas render the loaded art.
+    private void SyncTilesetTo(string name)
+    {
+        _refreshing = true;
+        _tilesetBox.SelectedItem = name;
+        _refreshing = false;
+        ApplySheet(name);
     }
 
     private static FilePickerFileType MapFileType => new("Map $data") { Patterns = new[] { "*.json" } };
