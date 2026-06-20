@@ -62,6 +62,9 @@ public class RpgGame : Game
         _tilesetInfo = info;
     }
 
+    /// <summary>The catalog name of the running map's tileset — the host loads that sheet's art (the chosen sheet, not a hardcoded one).</summary>
+    protected string MapTilesetName => _sim.Map.TilesetName;
+
     /// <inheritdoc />
     protected override void Update(GameTime gameTime)
     {

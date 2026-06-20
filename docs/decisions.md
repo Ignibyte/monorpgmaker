@@ -15,6 +15,26 @@ Decision D-0021 (2026-06-17) sets the bundled-asset license policy.
 Decision D-0022 (2026-06-19) locks the maker-tool GUI framework (Avalonia).
 Decision D-0023 (2026-06-19) locks the game-distribution model (the repo is the game).
 Decision D-0024 (2026-06-20) locks the unified trigger/event model (contract-first, one repeatable pattern).
+Decision D-0025 (2026-06-20) locks the per-map tileset reference (a `$data` name + a single-source catalog).
+
+---
+
+## D-0025 — A map references its tileset by a catalog name in `$data`; one source, editor + runtime honor it
+
+**Decision:** A map's `$data` carries a **map-level tileset name** (`TileMapData.Tileset` → `TileMap.TilesetName`)
+naming one sheet from a single-source **`TilesetCatalog`** (the committed LPC sheets — `lpc-mountains` /
+`lpc-grass` / `lpc-dirt` / `lpc-water`). The catalog (`Name` → `ResourceFile` + `TileSize`) is the **one source**
+the Studio picker, the `MapSerializer` load-time validation, and the runtime sheet selection all read, so editor
+and runtime **cannot drift**. An absent reference defaults to `lpc-mountains` (existing maps stay valid); an
+unknown name is a typed `MapLoadResult.Failure` (never a throw). **Tileset geometry stays host-derived from each
+loaded sheet's real pixels** (`Tileset.FromSheet`) — the catalog carries identity only, not dimensions, so it
+cannot drift from the art. One tileset per map (v1); multi-tileset / per-layer / autotiles / import are out.
+
+**Why:** Choosing the art per map is only coherent if the choice is *recorded* and *both* the editor and the
+Player honor it — a pure editor preview would persist nothing (the per-cell `tilesetId` is a bare index with no
+sheet identity). Routing every consumer through one catalog is the same single-descriptor discipline as the
+behaviour registry (D-0024): the editor offers exactly what the runtime renders. Keeping geometry derived from
+real pixels (not declared in the catalog) makes drift impossible without a pin test. (#20, the Studio-v2 arc.)
 
 ---
 

@@ -28,7 +28,10 @@ public sealed class Game1 : RpgGame
     {
         base.LoadContent();
 
-        using Stream? sheet = Assembly.GetExecutingAssembly().GetManifestResourceStream("lpc-mountains.png");
+        // Load the sheet the authored map chose (its $data tileset name), resolved through the single-source
+        // catalog (which falls back to the default sheet when the name is somehow unresolved).
+        string resource = TilesetCatalog.ResolveResourceFile(MapTilesetName);
+        using Stream? sheet = Assembly.GetExecutingAssembly().GetManifestResourceStream(resource);
         if (sheet is not null)
         {
             var texture = Texture2D.FromStream(GraphicsDevice, sheet);

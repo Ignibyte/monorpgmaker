@@ -16,6 +16,9 @@ public sealed class TileMapData
 
     /// <summary>The events placed on the map (optional; empty when none).</summary>
     public EventData[] Events { get; set; } = [];
+
+    /// <summary>The catalog name of the tileset the cells draw from (empty when absent — the loader defaults it).</summary>
+    public string Tileset { get; set; } = string.Empty;
 }
 
 /// <summary>The serializable <c>$data</c> shape of a single <see cref="Tile"/>.</summary>

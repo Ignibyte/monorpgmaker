@@ -188,8 +188,13 @@ arc. An **Event mode** in the map painter: click a tile to place/select an event
 trigger + kind + params (ShowText) + delete, and Save writes the same `$data` events (#18) the runtime loads +
 dispatches. Paint a map → place a sign → Save → run the Player → Space → your line (no more hand-edited JSON). The
 kind dropdown is the `BehaviourRegistry`'s **single descriptor** — the editor offers exactly what the runtime
-materialises, so they can't drift. The remaining Studio-v2 slices (a tileset picker, undo/redo, multi-map) + the
-agent-authored-kind flow follow.
+materialises, so they can't drift.
+
+**Tileset picker (#20):** the second Studio-v2 slice — choose among the committed LPC sheets (grass / dirt / water
+/ mountains) per map; the choice is recorded as a map-level tileset name in `$data` and **both the editor and the
+Player render the chosen sheet**, validated through a single-source `TilesetCatalog` (D-0025). Absent → defaults to
+mountains (existing maps unchanged); unknown → a typed load failure. The remaining Studio-v2 slices (undo/redo,
+multi-map) + the agent-authored-kind flow follow.
 
 ## Cross-cutting
 

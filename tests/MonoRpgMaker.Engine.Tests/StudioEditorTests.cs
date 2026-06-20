@@ -117,9 +117,7 @@ public class TilesetTests
 /// <summary>Tests for the <see cref="MapPaintSession"/> editor view-model (pointer math, paint, save/load totality).</summary>
 public class MapPaintSessionTests
 {
-    private static Tileset Sheet() => Tileset.FromSheet(384, 288, 32);
-
-    private static MapPaintSession Session(int width = 20, int height = 15) => new(Sheet(), width, height);
+    private static MapPaintSession Session(int width = 20, int height = 15) => new(TilesetCatalog.DefaultName, width, height);
 
     [Fact] // a zero cell size is a precondition violation
     public void CellAt_NegativeCellSize_Throws() =>
@@ -224,7 +222,7 @@ public class MapPaintSessionTests
         source.Paint(new Cell(3, 2));
         string saved = source.Save();
 
-        var target = new MapPaintSession(Sheet(), 1, 1);
+        var target = new MapPaintSession(TilesetCatalog.DefaultName, 1, 1);
         MapLoadResult result = target.Load(saved);
 
         Assert.True(result.Ok);

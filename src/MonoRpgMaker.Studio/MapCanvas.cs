@@ -14,7 +14,8 @@ namespace MonoRpgMaker.Studio;
 /// The map-editing surface: blits each cell's tileset sprite from the sheet, overlays a grid and a blocking
 /// indicator, and paints the active tile under the pointer (click + drag). A thin view over
 /// <see cref="MapPaintSession"/>; all behaviour is verified by the session's unit tests, so this is excluded
-/// from coverage.
+/// from coverage. The host owns the sheet bitmap + its <see cref="Tileset"/> geometry, swapping both on a
+/// tileset pick.
 /// </summary>
 [ExcludeFromCodeCoverage]
 public sealed class MapCanvas : Control
@@ -25,8 +26,9 @@ public sealed class MapCanvas : Control
     private static readonly IBrush EventMarker = new SolidColorBrush(Color.FromRgb(0xFF, 0xD7, 0x00), 0.85);
     private static readonly Pen SelectedPen = new(new SolidColorBrush(Colors.White), 2);
 
-    private readonly Bitmap _sheet;
     private readonly int _cellSize;
+    private Bitmap _sheet;
+    private Tileset _geometry;
     private MapPaintSession _session;
     private bool _painting;
 
@@ -36,11 +38,12 @@ public sealed class MapCanvas : Control
     /// <summary>Raised after an event is placed or selected, so the host can refresh its inspector.</summary>
     public event EventHandler? EventChanged;
 
-    /// <summary>Create the canvas over <paramref name="session"/>, blitting from <paramref name="sheet"/> at <paramref name="cellSize"/> pixels per cell.</summary>
-    public MapCanvas(MapPaintSession session, Bitmap sheet, int cellSize)
+    /// <summary>Create the canvas over <paramref name="session"/>, blitting from <paramref name="sheet"/> (sliced by <paramref name="geometry"/>) at <paramref name="cellSize"/> pixels per cell.</summary>
+    public MapCanvas(MapPaintSession session, Bitmap sheet, Tileset geometry, int cellSize)
     {
         _session = session;
         _sheet = sheet;
+        _geometry = geometry;
         _cellSize = cellSize;
         SyncSize();
     }
@@ -50,6 +53,14 @@ public sealed class MapCanvas : Control
     {
         _session = session;
         SyncSize();
+        InvalidateVisual();
+    }
+
+    /// <summary>Swap the tileset sheet + its geometry (after a tileset pick) and repaint.</summary>
+    public void SetSheet(Bitmap sheet, Tileset geometry)
+    {
+        _sheet = sheet;
+        _geometry = geometry;
         InvalidateVisual();
     }
 
@@ -65,7 +76,7 @@ public sealed class MapCanvas : Control
                 Tile tile = _session.TileAt(x, y);
                 var dest = new Rect(x * _cellSize, y * _cellSize, _cellSize, _cellSize);
 
-                if (_session.Tileset.TryGetSourceRect(tile.TilesetId, out SourceRect sr))
+                if (_geometry.TryGetSourceRect(tile.TilesetId, out SourceRect sr))
                 {
                     context.DrawImage(_sheet, new Rect(sr.X, sr.Y, sr.Width, sr.Height), dest);
                 }
