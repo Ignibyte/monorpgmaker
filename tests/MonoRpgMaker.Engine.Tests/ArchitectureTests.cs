@@ -52,6 +52,27 @@ public sealed class ArchitectureTests
     }
 
     [Fact]
+    public void World_Entities_Data_must_not_depend_on_Sim()
+    {
+        // The engine's internal ring: tiles / entities / database are LOWER than the
+        // simulation (Engine.Sim composes them into a WorldSim). A type that builds a
+        // WorldSim belongs in Engine.Sim (e.g. StartMap, TracerRoom), not World — this
+        // guards against re-inverting that layering (#17).
+        var result = Types.InAssembly(EngineAssembly)
+            .That()
+            .ResideInNamespaceStartingWith("MonoRpgMaker.Engine.World")
+            .Or().ResideInNamespaceStartingWith("MonoRpgMaker.Engine.Entities")
+            .Or().ResideInNamespaceStartingWith("MonoRpgMaker.Engine.Data")
+            .Should()
+            .NotHaveDependencyOn("MonoRpgMaker.Engine.Sim")
+            .GetResult();
+
+        Assert.True(
+            result.IsSuccessful,
+            FailureMessage("World / Entities / Data must not depend on Engine.Sim (the internal ring)", result));
+    }
+
+    [Fact]
     public void Abstractions_must_not_depend_on_MonoGame_Engine_or_hosts()
     {
         // The published seam surface (MonoRpgMaker.Abstractions) is pure: it must not

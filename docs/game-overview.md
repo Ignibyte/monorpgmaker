@@ -17,7 +17,7 @@ Two users, one codebase:
   events, menus, custom systems — as C# modules against the engine. They don't hand-write
   the systems, and they don't click through a command palette; they direct an agent that
   writes the code, then inspect and steer the result.
-- **Players** run the authored project, packaged per platform.
+- **Players** run the authored project, packaged per platform. *(First cut #17: the Player boots a bundled `$data` map — LPC tileset sprites, tile collision, a following camera — instead of a hardcoded scene; the repo is the game, D-0023.)*
 
 ## Core concepts
 

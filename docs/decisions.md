@@ -13,6 +13,26 @@ open-source positioning) — see [agentic-substrate.md](agentic-substrate.md) an
 [agentic-strategy.md](agentic-strategy.md).
 Decision D-0021 (2026-06-17) sets the bundled-asset license policy.
 Decision D-0022 (2026-06-19) locks the maker-tool GUI framework (Avalonia).
+Decision D-0023 (2026-06-19) locks the game-distribution model (the repo is the game).
+
+---
+
+## D-0023 — The repo IS the game: one repo = one game = one binary; no runtime project loader
+
+**Decision:** A monorpgmaker game **is a repository.** One repo = one game = one shipped binary. There is **no
+runtime "open project" / project-manager / dynamic project loader** — the engine loads ONLY its own **bundled**
+content (embedded resources; console-safe — never a roamed filesystem path). The Studio editor does dev-time file
+IO (import / export / save maps) as a convenience, but the **runtime never opens arbitrary projects**. A new game
+is a **clone of the template repo**. First cut (#17): the Player boots a bundled `content/maps/start.json`
+(embedded) rather than a hardcoded scene.
+
+**Why:** Compiled behavior makes runtime project-switching **incoherent** — a game's events/rules compile into its
+binary, so a running game-A binary cannot "open project B." Consoles sandbox the filesystem and want a fixed,
+bundled binary, not a runtime that roams a disk for a project folder. And the **game-is-a-repo inherits the whole
+apparatus for free** — the gate, the pipeline, CI, versioning, branching — because the game *is* a repo. It also
+deletes an entire category of work (a project manager, asset-root resolution, project-format versioning, an
+open-project UI). Deferred (flag, not built): **engine-as-referenced-package vs fork-the-template** — how the
+engine is consumed when you clone for a new game.
 
 ---
 

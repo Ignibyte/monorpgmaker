@@ -6,6 +6,7 @@ using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using MonoRpgMaker.Editor;
+using MonoRpgMaker.Engine.World;
 
 namespace MonoRpgMaker.Studio;
 
@@ -53,7 +54,7 @@ public sealed class TilePalette : Control
         base.OnPointerPressed(e);
 
         var pixel = e.GetPosition(this);
-        if (_session.Tileset.TryGetTileIndex(pixel.X, pixel.Y, out var index))
+        if (_session.Tileset.TryGetTileIndex((int)pixel.X, (int)pixel.Y, out var index))
         {
             _session.SelectTile(index, BlockingProvider?.Invoke() ?? false);
             InvalidateVisual();

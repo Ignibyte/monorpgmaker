@@ -82,8 +82,8 @@ This file is the *map of intent*; the slice-by-slice "how" lives in the pipeline
 ### C. Runtime gameplay  (M0 "tracer" — embryonic)
 | Capability | Status | Notes |
 |---|---|---|
-| Tile map (grid; tile = tileset id + collision flag) | 🟡 | one hand-built room; no multi-map, layers, or transitions |
-| Tile/sprite rendering | 🟡 | flat colored rectangles only — no real tileset/sprite images, no camera scroll |
+| Tile map (grid; tile = tileset id + collision flag) | 🟡 | the runtime now loads a **bundled `$data`** start map (#17, D-0023); no multi-map, layers, or transitions yet |
+| Tile/sprite rendering | 🟡 | **LPC tileset sprites + a following camera** (#17); the player is a placeholder quad — no walk-cycle animation yet |
 | Player movement (4-dir, collision vs tiles + doors) | ✅ | arrow keys; works |
 | Triggers | 🟡 | #13 added `ActionButton` (faced-cell `PressAction`); autorun / parallel deferred; no *authored* event placement data yet |
 | Event behavior (what an event runs) | 🟡 | 2 hand-coded examples (lever, chest); not yet agent-authored / scaffolded |

@@ -22,6 +22,15 @@
       <LogicalName>Icon.bmp</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
+  <!-- The repo is the game (D-0023): bundle the start map + tileset as embedded resources the runtime loads. -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\..\content\maps\start.json">
+      <LogicalName>start.json</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\assets\tilesets\lpc\lpc-mountains.png">
+      <LogicalName>lpc-mountains.png</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.4.1" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.4.1" />

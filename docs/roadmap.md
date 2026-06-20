@@ -170,6 +170,12 @@ LPC sprite tiles onto a `$data` map (a `Tileset` sheet model + `MapPaintSession`
 `MapSerializer`). **Avalonia is locked as the GUI framework (D-0022)**; the studio is a thin host over the gated
 Editor logic. The database editor, Modules panel, and inspector follow.
 
+**Playable runtime (#17):** the **author → save → play loop is closed** — the Player loads a bundled `$data` start
+map (embedded, D-0023), renders it with **LPC tileset sprites** (the `Tileset` model moved to `Engine.World`,
+shared with the editor), and the player **walks it with tile collision + a following `Camera`**. Paint a map in
+the Studio → it's `$data` → the runtime renders and walks it. (Player sprite is a placeholder; walk-cycle
+animation, multi-map, and events-in-runtime are deferred.)
+
 ## Cross-cutting
 
 - All game logic in `MonoRpgMaker.Engine` (framework-thin); sim deterministic (injected `IRandom`,

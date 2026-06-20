@@ -1,6 +1,6 @@
 using System;
 
-namespace MonoRpgMaker.Editor;
+namespace MonoRpgMaker.Engine.World;
 
 /// <summary>
 /// An integer source rectangle in a tileset sheet (pixels). Avalonia-free so the editor logic stays
@@ -81,7 +81,7 @@ public sealed class Tileset
     /// <see langword="false"/> for a negative position, a column beyond the sheet, or a position past the
     /// last tile. Pure — the palette view delegates here so the math is tested, not hidden in the UI.
     /// </summary>
-    public bool TryGetTileIndex(double pixelX, double pixelY, out int index)
+    public bool TryGetTileIndex(int pixelX, int pixelY, out int index)
     {
         index = 0;
         if (pixelX < 0 || pixelY < 0)
@@ -89,8 +89,8 @@ public sealed class Tileset
             return false;
         }
 
-        var col = (int)(pixelX / TileSize);
-        var row = (int)(pixelY / TileSize);
+        var col = pixelX / TileSize;
+        var row = pixelY / TileSize;
         if (col >= Columns)
         {
             return false;
