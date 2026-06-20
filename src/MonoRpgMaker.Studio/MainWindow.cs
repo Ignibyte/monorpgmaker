@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Input;
 using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
@@ -40,6 +41,8 @@ public sealed class MainWindow : Window
     private readonly ComboBox _tilesetBox;
     private readonly TextBox _textBox;
     private readonly StackPanel _inspector;
+    private readonly Button _undoButton;
+    private readonly Button _redoButton;
     private bool _refreshing;
 
     /// <summary>Build the window, its controls, and a default session over the default LPC sheet.</summary>
@@ -72,6 +75,13 @@ public sealed class MainWindow : Window
             VerticalAlignment = VerticalAlignment.Center,
         };
         _tilesetBox.SelectionChanged += (_, _) => OnTilesetPicked();
+
+        _undoButton = new Button { Content = "Undo", IsEnabled = false };
+        _undoButton.Click += (_, _) => _session.Undo();
+        _redoButton = new Button { Content = "Redo", IsEnabled = false };
+        _redoButton.Click += (_, _) => _session.Redo();
+        _session.HistoryChanged += (_, _) => RefreshHistory();
+        KeyDown += OnKeyDown;
 
         var blocking = new CheckBox { Content = "Blocking", VerticalAlignment = VerticalAlignment.Center };
         _palette.BlockingProvider = () => blocking.IsChecked == true;
@@ -113,6 +123,8 @@ public sealed class MainWindow : Window
         toolbar.Children.Add(newButton);
         toolbar.Children.Add(saveButton);
         toolbar.Children.Add(loadButton);
+        toolbar.Children.Add(_undoButton);
+        toolbar.Children.Add(_redoButton);
         toolbar.Children.Add(eventMode);
         toolbar.Children.Add(blocking);
         toolbar.Children.Add(new TextBlock { Text = "Tileset", VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(8, 0, 2, 0) });
@@ -171,6 +183,38 @@ public sealed class MainWindow : Window
         (Bitmap sheet, Tileset geometry) = LoadSheetFor(name);
         _canvas.SetSheet(sheet, geometry);
         _palette.SetSheet(sheet, geometry);
+    }
+
+    // Reflect the undo/redo state after any history change: enable/disable the buttons, repaint the canvas
+    // (undo/redo mutate the map), and refresh the inspector (selection is cleared on undo/redo).
+    private void RefreshHistory()
+    {
+        _undoButton.IsEnabled = _session.CanUndo;
+        _redoButton.IsEnabled = _session.CanRedo;
+        _canvas.InvalidateVisual();
+        RefreshInspector();
+    }
+
+    private void OnKeyDown(object? sender, KeyEventArgs e)
+    {
+        // Control on Windows/Linux, Meta (⌘) on macOS.
+        bool modifier = e.KeyModifiers.HasFlag(KeyModifiers.Control) || e.KeyModifiers.HasFlag(KeyModifiers.Meta);
+        if (!modifier)
+        {
+            return;
+        }
+
+        bool shift = e.KeyModifiers.HasFlag(KeyModifiers.Shift);
+        if (e.Key == Key.Z && !shift)
+        {
+            _session.Undo();
+            e.Handled = true;
+        }
+        else if (e.Key == Key.Y || (e.Key == Key.Z && shift))
+        {
+            _session.Redo();
+            e.Handled = true;
+        }
     }
 
     private StackPanel BuildInspector()
