@@ -19,6 +19,9 @@ public sealed class TileMapData
 
     /// <summary>The catalog name of the tileset the cells draw from (empty when absent — the loader defaults it).</summary>
     public string Tileset { get; set; } = string.Empty;
+
+    /// <summary>The doors placed on the map (optional; empty when none) — each binds a cell's tile to a switch.</summary>
+    public DoorData[] Doors { get; set; } = [];
 }
 
 /// <summary>The serializable <c>$data</c> shape of a single <see cref="Tile"/>.</summary>
@@ -55,4 +58,26 @@ public sealed class EventData
 
     /// <summary>The behaviour's kind-specific parameters (e.g. <c>text</c> for <c>ShowText</c>).</summary>
     public Dictionary<string, string> Params { get; set; } = new();
+}
+
+/// <summary>
+/// The serializable <c>$data</c> shape of a door: its cell, the switch that opens it, and its closed + open
+/// tiles. The runtime binds these to a <c>DoorRule</c> whose tile reflects the switch (D-0026).
+/// </summary>
+public sealed class DoorData
+{
+    /// <summary>The door cell column.</summary>
+    public int X { get; set; }
+
+    /// <summary>The door cell row.</summary>
+    public int Y { get; set; }
+
+    /// <summary>The switch that opens the door — while false the cell shows the closed tile, once true the open tile.</summary>
+    public string Switch { get; set; } = string.Empty;
+
+    /// <summary>The tile shown while the door is closed (typically blocking).</summary>
+    public TileData ClosedTile { get; set; } = new();
+
+    /// <summary>The tile shown once the door is open (typically walkable).</summary>
+    public TileData OpenTile { get; set; } = new();
 }

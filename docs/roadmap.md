@@ -215,8 +215,11 @@ end-to-end — F5 persists the game (active map + `$game` state + player positio
 (`GameSession.TryRestore`, total on a bad save) — so the runtime is replayable across sessions (REQ-006 closed).
 A third follow-up (#25) grows the **built-in library** — `Chest` (a give-once container) + `GiveItem` (items as
 `GameState` counters keyed `item.<id>`) join `ShowText` + `Warp` as placeable no-code behaviours, each via the
-contract-first recipe (D-0024), zero engine changes; **door** (needs door-tiles in `$data`) + **shop** (a buy/sell
-UI) are the remaining built-ins.
+contract-first recipe (D-0024), zero engine changes. A fourth (#26) adds **doors** — a map's `$data` carries
+switch-driven door tiles (`DoorData` round-tripped through `MapSerializer`, total) that `GameSession` threads to the
+runtime (`WorldSim.SyncDoors`), plus a placeable **`Lever`** (a give-once switch-setter) that opens them; the
+bundled start map ships a lever→door. Only **shop** (a buy/sell menu UI — inventory display + currency + a shop
+screen) remains as a listed built-in.
 
 ## Cross-cutting
 

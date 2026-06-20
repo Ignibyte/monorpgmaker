@@ -17,8 +17,8 @@ public static class MapSerializer
     /// <summary>Serialize <paramref name="map"/> to the JSON <c>$data</c> string (row-major cells, no events).</summary>
     public static string Serialize(TileMap map) => Serialize(map, Array.Empty<EventData>());
 
-    /// <summary>Serialize <paramref name="map"/> and its placed <paramref name="events"/> to the JSON <c>$data</c> string.</summary>
-    public static string Serialize(TileMap map, IReadOnlyList<EventData> events)
+    /// <summary>Serialize <paramref name="map"/>, its placed <paramref name="events"/>, and its <paramref name="doors"/> to the JSON <c>$data</c> string.</summary>
+    public static string Serialize(TileMap map, IReadOnlyList<EventData> events, IReadOnlyList<DoorData>? doors = null)
     {
         ArgumentNullException.ThrowIfNull(map);
         ArgumentNullException.ThrowIfNull(events);
@@ -39,7 +39,13 @@ public static class MapSerializer
             placed[i] = events[i];
         }
 
-        var data = new TileMapData { Width = map.Width, Height = map.Height, Tiles = tiles, Events = placed, Tileset = map.TilesetName };
+        var doorData = new DoorData[doors?.Count ?? 0];
+        for (var i = 0; i < doorData.Length; i++)
+        {
+            doorData[i] = doors![i];
+        }
+
+        var data = new TileMapData { Width = map.Width, Height = map.Height, Tiles = tiles, Events = placed, Tileset = map.TilesetName, Doors = doorData };
         return JsonSerializer.Serialize(data, MapJsonContext.Default.TileMapData);
     }
 
@@ -129,7 +135,34 @@ public static class MapSerializer
             }
         }
 
-        return MapLoadResult.Success(map, events);
+        // Doors are optional; validate each (totality — an off-map cell, empty switch, or missing tile is a typed
+        // failure, never a throw, so DoorRule.FromData only ever sees valid doors).
+        DoorData[] doors = data.Doors ?? [];
+        for (var i = 0; i < doors.Length; i++)
+        {
+            DoorData door = doors[i];
+            if (door is null)
+            {
+                return MapLoadResult.Failure("door " + i + " is null");
+            }
+
+            if (door.X < 0 || door.X >= data.Width || door.Y < 0 || door.Y >= data.Height)
+            {
+                return MapLoadResult.Failure("door " + i + " is off-map");
+            }
+
+            if (string.IsNullOrEmpty(door.Switch))
+            {
+                return MapLoadResult.Failure("door " + i + " has no switch");
+            }
+
+            if (door.ClosedTile is null || door.OpenTile is null)
+            {
+                return MapLoadResult.Failure("door " + i + " is missing a tile");
+            }
+        }
+
+        return MapLoadResult.Success(map, events, doors);
     }
 }
 

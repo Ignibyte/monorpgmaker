@@ -143,7 +143,7 @@ public sealed class GameSession
         }
 
         var player = new Actor("Hero", PlacePlayer(map.Map!, placeAt), maxHp: 30);
-        return WorldSim.TryCreate(map.Map!, player, events, Array.Empty<DoorRule>(), state);
+        return WorldSim.TryCreate(map.Map!, player, events, DoorRule.FromData(map.Doors), state);
     }
 
     // The player spawns at the target cell when it is in-bounds; an off-map cell falls back to a safe interior

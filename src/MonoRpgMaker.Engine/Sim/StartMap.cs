@@ -68,12 +68,34 @@ public static class StartMap
             Kind = "Warp",
             Params = { ["map"] = "town", ["x"] = "2", ["y"] = "2" },
         },
+        new EventData
+        {
+            Id = "lever-door",
+            X = 8,
+            Y = 9,
+            Trigger = "ActionButton",
+            Kind = "Lever",
+            Params = { ["switch"] = "door_open", ["message"] = "You pull the lever — the door grinds open." },
+        },
     ];
 
-    /// <summary>Build a <see cref="WorldSim"/> over <see cref="Build"/> + <see cref="Events"/>, the player at <see cref="PlayerStart"/>.</summary>
+    /// <summary>The start map's doors — a switch-driven barrier the bundled <c>Lever</c> opens (proving doors-from-<c>$data</c> through the runtime).</summary>
+    public static DoorData[] Doors() =>
+    [
+        new DoorData
+        {
+            X = 10,
+            Y = 9,
+            Switch = "door_open",
+            ClosedTile = new TileData { TilesetId = 1, Blocking = true },
+            OpenTile = new TileData { TilesetId = 66, Blocking = false },
+        },
+    ];
+
+    /// <summary>Build a <see cref="WorldSim"/> over <see cref="Build"/> + <see cref="Events"/> + <see cref="Doors"/>, the player at <see cref="PlayerStart"/>.</summary>
     public static WorldSim BuildWorld()
     {
-        WorldSimResult result = CreateWorld(Build(), Events());
+        WorldSimResult result = CreateWorld(Build(), Events(), Doors());
         return result.Sim ?? throw new InvalidOperationException(result.Error);
     }
 
@@ -121,7 +143,7 @@ public static class StartMap
     {
         var maps = new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            ["start"] = MapSerializer.Serialize(Build(), Events()),
+            ["start"] = MapSerializer.Serialize(Build(), Events(), Doors()),
             ["town"] = MapSerializer.Serialize(TownBuild(), TownEvents()),
         };
         GameSessionResult result = GameSession.Create(maps, "start", new GridPoint(PlayerStart.X, PlayerStart.Y));
@@ -140,10 +162,10 @@ public static class StartMap
             return WorldSimResult.Failure(loaded.Error!);
         }
 
-        return CreateWorld(loaded.Map!, loaded.Events);
+        return CreateWorld(loaded.Map!, loaded.Events, loaded.Doors);
     }
 
-    private static WorldSimResult CreateWorld(TileMap map, IReadOnlyList<EventData> placements)
+    private static WorldSimResult CreateWorld(TileMap map, IReadOnlyList<EventData> placements, IReadOnlyList<DoorData> doors)
     {
         var events = new List<IMapEvent>(placements.Count);
         for (var i = 0; i < placements.Count; i++)
@@ -158,6 +180,6 @@ public static class StartMap
         }
 
         var player = new Actor("Hero", PlayerStart, maxHp: 30);
-        return WorldSim.TryCreate(map, player, events, Array.Empty<DoorRule>());
+        return WorldSim.TryCreate(map, player, events, DoorRule.FromData(doors));
     }
 }
