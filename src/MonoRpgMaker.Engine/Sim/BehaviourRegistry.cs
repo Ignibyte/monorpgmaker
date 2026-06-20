@@ -37,6 +37,25 @@ public static class BehaviourRegistry
                 && p.TryGetValue("y", out string? sy) && int.TryParse(sy, out int y)
                     ? BehaviourResult.Success(new WarpEvent(cell, trigger, map, new GridPoint(x, y)))
                     : BehaviourResult.Failure("Warp requires a 'map' + integer 'x' + integer 'y'")),
+        new(
+            "GiveItem",
+            ["item", "amount", "message"],
+            static (cell, trigger, p) =>
+                p.TryGetValue("item", out string? gi)
+                && p.TryGetValue("amount", out string? ga) && int.TryParse(ga, out int gn)
+                && p.TryGetValue("message", out string? gm)
+                    ? BehaviourResult.Success(new GiveItemEvent(cell, trigger, gi, gn, gm))
+                    : BehaviourResult.Failure("GiveItem requires an 'item' + integer 'amount' + 'message'")),
+        new(
+            "Chest",
+            ["item", "amount", "switch", "message"],
+            static (cell, trigger, p) =>
+                p.TryGetValue("item", out string? ci)
+                && p.TryGetValue("amount", out string? ca) && int.TryParse(ca, out int cn)
+                && p.TryGetValue("switch", out string? cs)
+                && p.TryGetValue("message", out string? cm)
+                    ? BehaviourResult.Success(new ContainerEvent(cell, trigger, ci, cn, cs, cm))
+                    : BehaviourResult.Failure("Chest requires an 'item' + integer 'amount' + 'switch' + 'message'")),
     ];
 
     private static readonly Dictionary<string, Func<GridPoint, EventTrigger, IReadOnlyDictionary<string, string>, BehaviourResult>> Factories = BuildFactories();

@@ -1,0 +1,3 @@
+# Chest — give-once: first open grants an item + opens, then empty.
+=> AddCounter(item.potion, 1); SetSwitch(chest_opened, true); ShowMessage("You open the chest.")
+chest_opened=true => ShowMessage("The chest is empty.")
