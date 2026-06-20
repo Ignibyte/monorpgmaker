@@ -83,7 +83,7 @@ This file is the *map of intent*; the slice-by-slice "how" lives in the pipeline
 | Capability | Status | Notes |
 |---|---|---|
 | Tile map (grid; tile = tileset id + collision flag) | 🟡 | the runtime now holds **many embedded maps** by id + a `game.json` manifest (#22, D-0026) with **`Warp` transitions** between them (a `GameSession` switch carrying `$game` state); layers / autotiles still deferred |
-| Tile/sprite rendering | 🟡 | **LPC tileset sprites + a following camera** (#17); the player is a placeholder quad — no walk-cycle animation yet |
+| Tile/sprite rendering | 🟡 | **LPC tileset sprites + a following camera** (#17); the active map's tileset sheet now **reloads on a warp** (#23, D-0022/D-0025 — the host signals, `Game1` reloads through the catalog) so each map renders with its own sheet (start⇄town = `lpc-mountains`⇄`lpc-grass`); the player is a placeholder quad — no walk-cycle animation yet |
 | Player movement (4-dir, collision vs tiles + doors) | ✅ | arrow keys; works |
 | Triggers | 🟡 | #13 `ActionButton`/`PressAction`; **#18 — placed events are now `$data`** (`{id, cell, trigger, behaviour{kind, params}}`, total deserialize) the runtime materialises + dispatches; autorun / parallel still deferred |
 | Event behavior (what an event runs) | 🟡 | a contract-first **`BehaviourRegistry`** binds `kind`→`IMapEvent` (#18, D-0024 — the single binding point); the first built-ins **`ShowText`** (no-code dialogue) + **`Warp`** (#22 — the map-to-map transition, the first cross-map behaviour, D-0026), both gate:13-validated; the rest of the library (chest / door / shop / give-item) + the agent flow follow |

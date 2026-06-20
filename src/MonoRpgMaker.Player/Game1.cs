@@ -27,13 +27,14 @@ public sealed class Game1 : RpgGame
     {
     }
 
-    /// <inheritdoc />
-    protected override void LoadContent()
+    /// <summary>
+    /// Reload the embedded sheet for the active map's tileset (the single-source <see cref="TilesetCatalog"/>
+    /// resolves it) — fired by the base host on the first frame and whenever a warp switches to a map with a
+    /// different tileset, so the active map always renders with its own art.
+    /// </summary>
+    protected override void OnTilesetChanged(string tilesetName)
     {
-        base.LoadContent();
-
-        // Load the sheet the active map chose (its $data tileset name), resolved through the single-source catalog.
-        string resource = TilesetCatalog.ResolveResourceFile(MapTilesetName);
+        string resource = TilesetCatalog.ResolveResourceFile(tilesetName);
         using Stream? sheet = Assembly.GetExecutingAssembly().GetManifestResourceStream(resource);
         if (sheet is not null)
         {
