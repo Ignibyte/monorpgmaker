@@ -24,3 +24,6 @@ public sealed record AddCounter(string Key, int Amount) : Outcome;
 
 /// <summary>Show <paramref name="Text"/> to the player.</summary>
 public sealed record ShowMessage(string Text) : Outcome;
+
+/// <summary>Transition the player to map <paramref name="MapId"/> at target <paramref name="Cell"/>. The sim-host applies the switch (the behaviour only returns this — D-0017).</summary>
+public sealed record Warp(string MapId, GridPoint Cell) : Outcome;

@@ -59,6 +59,15 @@ public static class StartMap
             Kind = "ShowText",
             Params = { ["text"] = "Welcome to monorpgmaker! Use the arrow keys to explore." },
         },
+        new EventData
+        {
+            Id = "to-town",
+            X = 14,
+            Y = 9,
+            Trigger = "StepOn",
+            Kind = "Warp",
+            Params = { ["map"] = "town", ["x"] = "2", ["y"] = "2" },
+        },
     ];
 
     /// <summary>Build a <see cref="WorldSim"/> over <see cref="Build"/> + <see cref="Events"/>, the player at <see cref="PlayerStart"/>.</summary>
@@ -66,6 +75,54 @@ public static class StartMap
     {
         WorldSimResult result = CreateWorld(Build(), Events());
         return result.Sim ?? throw new InvalidOperationException(result.Error);
+    }
+
+    /// <summary>The town map — a second bundled room the start map warps to (proving the runtime map switch).</summary>
+    public static TileMap TownBuild()
+    {
+        const int width = 16;
+        const int height = 12;
+        var map = new TileMap(width, height);
+        for (var y = 0; y < height; y++)
+        {
+            for (var x = 0; x < width; x++)
+            {
+                var border = x == 0 || y == 0 || x == width - 1 || y == height - 1;
+                map.SetTile(new Point(x, y), border ? Wall : Floor);
+            }
+        }
+
+        return map;
+    }
+
+    /// <summary>The town map's placed events — a Warp back to the start map.</summary>
+    public static EventData[] TownEvents() =>
+    [
+        new EventData
+        {
+            Id = "to-start",
+            X = 12,
+            Y = 9,
+            Trigger = "StepOn",
+            Kind = "Warp",
+            Params = { ["map"] = "start", ["x"] = "2", ["y"] = "2" },
+        },
+    ];
+
+    /// <summary>
+    /// Build the canonical two-map <see cref="GameSession"/> (<c>start</c> + <c>town</c>, addressable by id), the
+    /// player at <see cref="PlayerStart"/> on the start map — the programmatic bootstrap the Player falls back to,
+    /// and the shape the bundled content (<c>game.json</c> + per-map <c>$data</c>) mirrors.
+    /// </summary>
+    public static GameSession BuildSession()
+    {
+        var maps = new Dictionary<string, string>(StringComparer.Ordinal)
+        {
+            ["start"] = MapSerializer.Serialize(Build(), Events()),
+            ["town"] = MapSerializer.Serialize(TownBuild(), TownEvents()),
+        };
+        GameSessionResult result = GameSession.Create(maps, "start", new GridPoint(PlayerStart.X, PlayerStart.Y));
+        return result.Session ?? throw new InvalidOperationException(result.Error);
     }
 
     /// <summary>

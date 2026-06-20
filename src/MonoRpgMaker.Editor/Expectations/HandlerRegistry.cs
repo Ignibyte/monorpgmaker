@@ -21,6 +21,7 @@ public static class HandlerRegistry
             ["LeverEvent"] = static () => new LeverEvent(GridPoint.Zero),
             ["ChestEvent"] = static () => new ChestEvent(GridPoint.Zero),
             ["ShowText"] = static () => new ShowTextEvent(GridPoint.Zero, EventTrigger.ActionButton, "Welcome, traveller!"),
+            ["Warp"] = static () => new WarpEvent(GridPoint.Zero, EventTrigger.StepOn, "town", new GridPoint(3, 4)),
         };
 
     /// <summary>Get the handler factory for <paramref name="module"/>; false if none is registered.</summary>

@@ -27,6 +27,9 @@ public sealed class SaveState
 
     /// <summary>The captured RNG generator state — restores an identical continuation.</summary>
     public ulong RngState { get; set; }
+
+    /// <summary>The id of the map the player is on (empty = the start map; back-compat for pre-multi-map saves).</summary>
+    public string MapId { get; set; } = string.Empty;
 }
 
 /// <summary>A saved switch: its key and boolean value.</summary>

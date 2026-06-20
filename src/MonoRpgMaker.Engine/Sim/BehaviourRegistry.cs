@@ -28,6 +28,15 @@ public static class BehaviourRegistry
                 p.TryGetValue("text", out string? text)
                     ? BehaviourResult.Success(new ShowTextEvent(cell, trigger, text))
                     : BehaviourResult.Failure("ShowText requires a 'text' parameter")),
+        new(
+            "Warp",
+            ["map", "x", "y"],
+            static (cell, trigger, p) =>
+                p.TryGetValue("map", out string? map)
+                && p.TryGetValue("x", out string? sx) && int.TryParse(sx, out int x)
+                && p.TryGetValue("y", out string? sy) && int.TryParse(sy, out int y)
+                    ? BehaviourResult.Success(new WarpEvent(cell, trigger, map, new GridPoint(x, y)))
+                    : BehaviourResult.Failure("Warp requires a 'map' + integer 'x' + integer 'y'")),
     ];
 
     private static readonly Dictionary<string, Func<GridPoint, EventTrigger, IReadOnlyDictionary<string, string>, BehaviourResult>> Factories = BuildFactories();

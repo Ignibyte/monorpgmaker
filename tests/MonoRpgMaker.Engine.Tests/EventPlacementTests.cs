@@ -287,9 +287,8 @@ public class MapPaintSessionEventTests
     public void AvailableKinds_IsTheRegistrySource()
     {
         Assert.Same(BehaviourRegistry.Kinds, MapPaintSession.AvailableKinds);
-        BehaviourKindInfo kind = Assert.Single(MapPaintSession.AvailableKinds);
-        Assert.Equal("ShowText", kind.Name);
-        Assert.Equal("text", Assert.Single(kind.ParamKeys));
+        BehaviourKindInfo showText = Assert.Single(MapPaintSession.AvailableKinds, k => k.Name == "ShowText");
+        Assert.Equal("text", Assert.Single(showText.ParamKeys));
     }
 }
 
@@ -299,8 +298,13 @@ public class BehaviourKindsTests
     [Fact] // the #18 suite asserts Factories (via TryMaterialize); this kills the BuildKinds map mutant
     public void Kinds_ShowText_WithTextParam()
     {
-        BehaviourKindInfo kind = Assert.Single(BehaviourRegistry.Kinds);
-        Assert.Equal("ShowText", kind.Name);
-        Assert.Equal("text", Assert.Single(kind.ParamKeys));
+        BehaviourKindInfo showText = Assert.Single(BehaviourRegistry.Kinds, k => k.Name == "ShowText");
+        Assert.Equal("text", Assert.Single(showText.ParamKeys));
+
+        BehaviourKindInfo warp = Assert.Single(BehaviourRegistry.Kinds, k => k.Name == "Warp");
+        Assert.Equal(3, warp.ParamKeys.Count);
+        Assert.Contains("map", warp.ParamKeys);
+        Assert.Contains("x", warp.ParamKeys);
+        Assert.Contains("y", warp.ParamKeys);
     }
 }

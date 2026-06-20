@@ -16,6 +16,30 @@ Decision D-0022 (2026-06-19) locks the maker-tool GUI framework (Avalonia).
 Decision D-0023 (2026-06-19) locks the game-distribution model (the repo is the game).
 Decision D-0024 (2026-06-20) locks the unified trigger/event model (contract-first, one repeatable pattern).
 Decision D-0025 (2026-06-20) locks the per-map tileset reference (a `$data` name + a single-source catalog).
+Decision D-0026 (2026-06-20) locks the multi-map model (embedded per-map `$data` by id + a manifest; a `GameSession` applies the `Warp` switch).
+
+---
+
+## D-0026 — Multi-map: embedded per-map `$data` by id + a manifest; a `GameSession` applies the `Warp` switch
+
+**Decision:** A game holds **many maps** as embedded per-map `$data` (`content/maps/<id>.json`) addressed by a
+stable **id**, plus an embedded **`game.json` manifest** `{ startMap, mapIds[] }` — console-safe bundled content
+(D-0023; no roamed paths, no runtime project loader). A new gated **`GameSession`** orchestrator (`Engine.Sim`)
+above `WorldSim` owns the `id → $data` registry + the active `WorldSim` and **applies** a map switch: on a pending
+`Warp` it loads the target by id, builds a fresh `WorldSim`, places the player at the target cell, and **carries
+the `GameState`** across (switches/counters persist — `WorldSim`'s `GameState` is now injectable). The built-in
+**`Warp`** behaviour only **returns** a declarative `Warp(MapId, Cell)` outcome (D-0017); the `OutcomeApplier`
+signals a pending warp and the `GameSession` (the sim-host) performs the switch — the behaviour never mutates.
+Load-by-id is **total** (unknown id / off-map target cell / malformed `$data` / unmaterialisable events → a typed
+failure or safe no-op, never a throw). Save records the active **`MapId`** (absent → the start map). The Studio
+authors the set through a gated, neutral **`MapProject`** (a map list + the kind-aware, param-key-driven Warp
+inspector reading the registry's `BehaviourKindInfo.ParamKeys`), and the saved set is runtime-valid (cross-layer).
+
+**Why:** A one-map runtime isn't a world. Per-map files + a manifest mirror the existing single `start.json` and
+scale (each map already names its own tileset, D-0025) without a one-file bottleneck. Putting the switch in a
+sim-host orchestrator — not in `WorldSim` (immutable per-map) and not in the behaviour (D-0017 forbids it) — keeps
+the behaviour pure and the simulation deterministic; `Warp` is just the first cross-map behaviour on the same
+contract-first recipe as `ShowText` (D-0024). (#22 — the Studio-v2 arc finale + the trigger program's Slice 2.)
 
 ---
 

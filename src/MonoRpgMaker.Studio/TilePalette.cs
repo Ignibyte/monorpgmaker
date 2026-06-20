@@ -20,7 +20,7 @@ public sealed class TilePalette : Control
 {
     private static readonly Pen HighlightPen = new(new SolidColorBrush(Colors.Gold), 2);
 
-    private readonly MapPaintSession _session;
+    private MapPaintSession _session;
     private Bitmap _sheet;
     private Tileset _geometry;
 
@@ -47,6 +47,13 @@ public sealed class TilePalette : Control
         _geometry = geometry;
         Width = sheet.Size.Width;
         Height = sheet.Size.Height;
+        InvalidateVisual();
+    }
+
+    /// <summary>Swap the session under edit (after switching the active map) and repaint the highlight.</summary>
+    public void SetSession(MapPaintSession session)
+    {
+        _session = session;
         InvalidateVisual();
     }
 

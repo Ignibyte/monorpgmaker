@@ -17,10 +17,11 @@ public static class SaveSerializer
     /// <summary>The current save-format version.</summary>
     public const int CurrentVersion = 1;
 
-    /// <summary>Serialize the game state + player placement + RNG state to a JSON save string.</summary>
-    public static string Serialize(GameState state, Point playerCell, Direction facing, ulong rngState)
+    /// <summary>Serialize the game state + player placement + RNG state + the active map id to a JSON save string.</summary>
+    public static string Serialize(GameState state, Point playerCell, Direction facing, ulong rngState, string mapId = "")
     {
         ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(mapId);
 
         IReadOnlyList<KeyValuePair<string, bool>> switchEntries = state.SwitchEntries;
         var switches = new SwitchEntry[switchEntries.Count];
@@ -45,6 +46,7 @@ public static class SaveSerializer
             PlayerY = playerCell.Y,
             Facing = (int)facing,
             RngState = rngState,
+            MapId = mapId,
         };
 
         return JsonSerializer.Serialize(save, SaveJsonContext.Default.SaveState);

@@ -172,6 +172,17 @@ public static class ExpectationParser
             return new AddCounter(ctrArgs[0], amount);
         }
 
+        // Warp("map", x, y) — a quoted map id + an integer target cell (flat 3-arg; a tuple's inner comma would
+        // break the naive comma split).
+        if (TryArgs(text, "Warp(", out string[] warpArgs) &&
+            warpArgs.Length == 3 &&
+            warpArgs[0].Length >= 2 && warpArgs[0][0] == '"' && warpArgs[0][^1] == '"' &&
+            int.TryParse(warpArgs[1], NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out int wx) &&
+            int.TryParse(warpArgs[2], NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture, out int wy))
+        {
+            return new Warp(warpArgs[0][1..^1], new GridPoint(wx, wy));
+        }
+
         return null;
     }
 

@@ -24,8 +24,11 @@
   </ItemGroup>
   <!-- The repo is the game (D-0023): bundle the start map + tileset as embedded resources the runtime loads. -->
   <ItemGroup>
-    <EmbeddedResource Include="..\..\content\maps\start.json">
-      <LogicalName>start.json</LogicalName>
+    <EmbeddedResource Include="..\..\content\game.json">
+      <LogicalName>game.json</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="..\..\content\maps\*.json">
+      <LogicalName>%(Filename)%(Extension)</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="..\..\assets\tilesets\lpc\*.png">
       <LogicalName>%(Filename)%(Extension)</LogicalName>
