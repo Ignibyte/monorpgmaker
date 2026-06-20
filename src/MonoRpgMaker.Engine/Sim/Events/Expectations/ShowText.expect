@@ -1,0 +1,2 @@
+# ShowText — the built-in dialogue behaviour shows its configured line on action.
+=> ShowMessage("Welcome, traveller!")

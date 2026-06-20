@@ -91,6 +91,7 @@ public class RpgGame : Game
             samplerState: SamplerState.PointClamp,
             transformMatrix: Matrix.CreateTranslation(-offset.X, -offset.Y, 0));
         DrawMap(_spriteBatch, _pixel);
+        DrawEventMarkers(_spriteBatch, _pixel);
         DrawPlayer(_spriteBatch, _pixel);
         _spriteBatch.End();
 
@@ -134,6 +135,9 @@ public class RpgGame : Game
             Step(Direction.Left);
         else if (Pressed(keyboard, Keys.Right))
             Step(Direction.Right);
+
+        if (Pressed(keyboard, Keys.Space) || Pressed(keyboard, Keys.Enter))
+            Act();
     }
 
     private bool Pressed(KeyboardState keyboard, Keys key) =>
@@ -142,6 +146,17 @@ public class RpgGame : Game
     private void Step(Direction direction)
     {
         _sim.MovePlayer(direction);
+        UpdateTitle();
+    }
+
+    private void Act()
+    {
+        _sim.PressAction();
+        UpdateTitle();
+    }
+
+    private void UpdateTitle()
+    {
         if (_sim.CurrentMessage is { } message)
         {
             Window.Title = $"monorpgmaker — {message}";
@@ -150,6 +165,20 @@ public class RpgGame : Game
         else
         {
             Window.Title = "monorpgmaker";
+        }
+    }
+
+    private void DrawEventMarkers(SpriteBatch batch, Texture2D pixel)
+    {
+        foreach (var cell in _sim.EventCells)
+        {
+            var inset = TileSize / 4;
+            var rect = new Rectangle(
+                (cell.X * TileSize) + inset,
+                (cell.Y * TileSize) + inset,
+                TileSize - (2 * inset),
+                TileSize - (2 * inset));
+            batch.Draw(pixel, rect, Color.Gold);
         }
     }
 

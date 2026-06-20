@@ -85,8 +85,8 @@ This file is the *map of intent*; the slice-by-slice "how" lives in the pipeline
 | Tile map (grid; tile = tileset id + collision flag) | 🟡 | the runtime now loads a **bundled `$data`** start map (#17, D-0023); no multi-map, layers, or transitions yet |
 | Tile/sprite rendering | 🟡 | **LPC tileset sprites + a following camera** (#17); the player is a placeholder quad — no walk-cycle animation yet |
 | Player movement (4-dir, collision vs tiles + doors) | ✅ | arrow keys; works |
-| Triggers | 🟡 | #13 added `ActionButton` (faced-cell `PressAction`); autorun / parallel deferred; no *authored* event placement data yet |
-| Event behavior (what an event runs) | 🟡 | 2 hand-coded examples (lever, chest); not yet agent-authored / scaffolded |
+| Triggers | 🟡 | #13 `ActionButton`/`PressAction`; **#18 — placed events are now `$data`** (`{id, cell, trigger, behaviour{kind, params}}`, total deserialize) the runtime materialises + dispatches; autorun / parallel still deferred |
+| Event behavior (what an event runs) | 🟡 | a contract-first **`BehaviourRegistry`** binds `kind`→`IMapEvent` (#18, D-0024 — the single binding point); the first built-in **`ShowText`** (no-code dialogue, gate:13-validated); the built-in library + the agent flow follow |
 | Doors (switch-driven passability) | ✅ | the lever→door demo |
 | Switches + variables (`GameState`) | 🟡 | named bool switches + int counters; **no persistence** (resets each run) |
 | Messages | 🟡 | single "current message" banner; no message box, queue, choices, or portraits |

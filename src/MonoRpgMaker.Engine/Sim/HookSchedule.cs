@@ -16,6 +16,9 @@ public sealed class HookSchedule
 
     private HookSchedule(IReadOnlyList<IMapEvent> events) => _events = events;
 
+    /// <summary>The schedule's events, in validated dispatch order.</summary>
+    public IReadOnlyList<IMapEvent> Events => _events;
+
     /// <summary>
     /// Validate <paramref name="events"/> into a schedule: succeeds unless two events share the same cell,
     /// trigger, and order (ambiguous). Never throws on the validation path — a genuine null argument is a

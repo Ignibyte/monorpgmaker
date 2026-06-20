@@ -255,7 +255,7 @@ fi
 #    tracer handlers against their authored expectation tables (D-0017 §7). ────────────
 oracle_g() {
   dotnet run --no-build --verbosity quiet --project src/MonoRpgMaker.Editor \
-    -- check-expectations src/MonoRpgMaker.Engine/Sim/Tracer/Expectations
+    -- check-expectations src/MonoRpgMaker.Engine/Sim
 }
 run_gate "gate:13 .expect oracle (MRM0006)" oracle_g
 

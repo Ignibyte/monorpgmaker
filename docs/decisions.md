@@ -14,6 +14,28 @@ open-source positioning) — see [agentic-substrate.md](agentic-substrate.md) an
 Decision D-0021 (2026-06-17) sets the bundled-asset license policy.
 Decision D-0022 (2026-06-19) locks the maker-tool GUI framework (Avalonia).
 Decision D-0023 (2026-06-19) locks the game-distribution model (the repo is the game).
+Decision D-0024 (2026-06-20) locks the unified trigger/event model (contract-first, one repeatable pattern).
+
+---
+
+## D-0024 — The unified trigger/event model: contract-first, one repeatable pattern
+
+**Decision:** Every interactive thing in a game — NPCs, shopkeepers, room warps, chests, doors, signs — is the
+**same construct: a trigger placed on a tile + a behaviour bound to it.** Placement is **data** (`$data`: `id`,
+`cell`, `trigger`, `behaviour { kind, params }`); behaviour comes from one of two **interchangeable** sources on
+the same model — **built-in behaviours** (engine-shipped, no-code, data-configured: `ShowText` / `Warp` / `Shop`
+/ `GiveItem` / `Door` — the no-code baseline, **dialogue included**) or **agent-authored modules** (custom C# for
+real logic). Both implement the published **`IMapEvent`** seam (#13) and return declarative `Outcome`s; a single
+**registry** binds `kind` → behaviour. It is built **contract-first as ONE repeatable pattern** — no one-off
+triggers: the recipe is always *implement `IMapEvent`, register the kind, declare its `.expect` (gate:13).*
+
+**Why:** A unified placed-trigger model is a major simplification over RPG Maker's five-special-cases-per-feature.
+The built-in/agent split gives the **no-code baseline you don't fight** for the common 80% (you never summon an
+agent to say "Hello") **and** full flexibility for the custom 20% — chosen per trigger. Contract-first + the
+registry keeps it reusable and repeatable: built-in and agent behaviours are interchangeable at the interface,
+and the `.expect` oracle guards every one. Sequencing (see `INTAKE-event-trigger-system`): foundation
+(triggers-as-`$data` + registry + dispatch, proven with built-in `ShowText`) → the built-in library → the Studio
+placement UI → the agent authoring flow. (Owner direction, 2026-06-20.)
 
 ---
 

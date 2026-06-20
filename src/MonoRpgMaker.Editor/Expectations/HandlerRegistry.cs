@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using MonoRpgMaker.Abstractions;
+using MonoRpgMaker.Engine.Sim.Events;
 using MonoRpgMaker.Engine.Sim.Tracer;
 
 namespace MonoRpgMaker.Editor.Expectations;
@@ -19,6 +20,7 @@ public static class HandlerRegistry
         {
             ["LeverEvent"] = static () => new LeverEvent(GridPoint.Zero),
             ["ChestEvent"] = static () => new ChestEvent(GridPoint.Zero),
+            ["ShowText"] = static () => new ShowTextEvent(GridPoint.Zero, EventTrigger.ActionButton, "Welcome, traveller!"),
         };
 
     /// <summary>Get the handler factory for <paramref name="module"/>; false if none is registered.</summary>

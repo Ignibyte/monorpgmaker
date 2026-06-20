@@ -99,6 +99,21 @@ public class OracleCliTests
         Assert.Contains("reproduced — OK", writer.ToString(), StringComparison.Ordinal);
     }
 
+    [Fact] // the scan is RECURSIVE — a .expect in a nested subdir is found (kills SearchOption.AllDirectories → TopDirectoryOnly)
+    public void Run_NestedExpect_FoundRecursively()
+    {
+        int code = RunOnTempDir(
+            dir =>
+            {
+                string sub = Directory.CreateDirectory(Path.Combine(dir, "Events", "Expectations")).FullName;
+                Write(sub, "ShowText", "=> ShowMessage(\"Welcome, traveller!\")");
+            },
+            out string output);
+
+        Assert.Equal(0, code);
+        Assert.Contains("1 row across 1 module reproduced — OK", output, StringComparison.Ordinal);
+    }
+
     private static void Write(string dir, string module, string content) =>
         File.WriteAllText(Path.Combine(dir, module + ".expect"), content);
 
