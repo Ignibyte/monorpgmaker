@@ -71,8 +71,11 @@ A single, contract-first **trigger/event system**:
   **Slice 2 is next.**
 - **Slice 2 — the built-in library:** `GiveItem`/chest (stateful, open-once), `Door`, `Shop`, and `Warp`
   (needs multi-map). Each is one registry entry + an `IMapEvent` + an `.expect`.
-- **Slice 3 — UI placement (Studio):** drop + name trigger markers on tiles, pick the behaviour kind, fill
-  params → writes the `$data` placements (the "light event-placement UI; GUID identity" from the roadmap).
+- **Slice 3 — UI placement (Studio): ✅ DONE (#19, ticket 8374d948 — the Studio-v2 arc lead):** Event mode in the
+  painter — click a tile → place/select an event, an inspector sets trigger + kind + params (ShowText) + delete →
+  writes the `$data` placements via the events-aware `MapSerializer` (#18). Gate-green (Editor MSI 84.60); the
+  kind dropdown is the `BehaviourRegistry`'s single descriptor (editor ⇄ runtime can't drift). The remaining
+  Studio-v2 slices (tileset picker, undo/redo, multi-map) remain.
 - **Slice 4 — the agent authoring flow:** describe a custom behaviour → the agent scaffolds (#11) + writes the
   `IMapEvent` module keyed to the trigger id + its `.expect` → the gate validates → it runs.
 

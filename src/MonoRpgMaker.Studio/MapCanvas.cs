@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 using Avalonia;
 using Avalonia.Controls;
@@ -21,11 +22,19 @@ public sealed class MapCanvas : Control
     private static readonly IBrush Background = new SolidColorBrush(Color.FromRgb(0x20, 0x20, 0x24));
     private static readonly IBrush BlockingOverlay = new SolidColorBrush(Colors.Red, 0.30);
     private static readonly Pen GridPen = new(new SolidColorBrush(Color.FromArgb(0x30, 0xFF, 0xFF, 0xFF)));
+    private static readonly IBrush EventMarker = new SolidColorBrush(Color.FromRgb(0xFF, 0xD7, 0x00), 0.85);
+    private static readonly Pen SelectedPen = new(new SolidColorBrush(Colors.White), 2);
 
     private readonly Bitmap _sheet;
     private readonly int _cellSize;
     private MapPaintSession _session;
     private bool _painting;
+
+    /// <summary>When true, a pointer press places/selects an event instead of painting a tile.</summary>
+    public bool EventMode { get; set; }
+
+    /// <summary>Raised after an event is placed or selected, so the host can refresh its inspector.</summary>
+    public event EventHandler? EventChanged;
 
     /// <summary>Create the canvas over <paramref name="session"/>, blitting from <paramref name="sheet"/> at <paramref name="cellSize"/> pixels per cell.</summary>
     public MapCanvas(MapPaintSession session, Bitmap sheet, int cellSize)
@@ -69,14 +78,39 @@ public sealed class MapCanvas : Control
                 context.DrawRectangle(null, GridPen, dest);
             }
         }
+
+        foreach (Cell cell in _session.EventCells)
+        {
+            var inset = _cellSize / 4.0;
+            var marker = new Rect((cell.X * _cellSize) + inset, (cell.Y * _cellSize) + inset, _cellSize - (2 * inset), _cellSize - (2 * inset));
+            context.FillRectangle(EventMarker, marker);
+        }
+
+        if (_session.SelectedEvent is { } selected)
+        {
+            context.DrawRectangle(null, SelectedPen, new Rect(selected.Cell.X * _cellSize, selected.Cell.Y * _cellSize, _cellSize, _cellSize));
+        }
     }
 
     /// <inheritdoc />
     protected override void OnPointerPressed(PointerPressedEventArgs e)
     {
         base.OnPointerPressed(e);
+        Point pos = e.GetPosition(this);
+        if (EventMode)
+        {
+            if (_session.CellAt(pos.X, pos.Y, _cellSize) is { } cell)
+            {
+                _session.AddEvent(cell);
+                InvalidateVisual();
+                EventChanged?.Invoke(this, EventArgs.Empty);
+            }
+
+            return;
+        }
+
         _painting = true;
-        PaintAt(e.GetPosition(this));
+        PaintAt(pos);
     }
 
     /// <inheritdoc />
