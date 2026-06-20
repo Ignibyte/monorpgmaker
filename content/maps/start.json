@@ -2018,5 +2018,17 @@
       "tilesetId": 1,
       "blocking": true
     }
+  ],
+  "events": [
+    {
+      "id": "sign-welcome",
+      "x": 6,
+      "y": 4,
+      "trigger": "ActionButton",
+      "kind": "ShowText",
+      "params": {
+        "text": "Welcome to monorpgmaker! Use the arrow keys to explore."
+      }
+    }
   ]
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using MonoRpgMaker.Abstractions;
 using MonoRpgMaker.Engine.Entities;
@@ -10,7 +11,8 @@ namespace MonoRpgMaker.Engine.Sim;
 /// The runtime's bundled start map — the canonical first room a freshly-cloned game boots into (D-0023: the
 /// engine loads only its own bundled content). Built programmatically and serialized to
 /// <c>content/maps/start.json</c> (the committed <c>$data</c> the Player embeds + loads). A walkable floor inside
-/// a <see cref="Tile.Blocking"/> wall border, painted with LPC mountains-sheet tile indices. No events yet.
+/// a <see cref="Tile.Blocking"/> wall border, painted with LPC mountains-sheet tile indices, with one placed
+/// <c>ShowText</c> event (materialised through the behaviour registry, D-0024).
 /// </summary>
 public static class StartMap
 {
@@ -45,10 +47,24 @@ public static class StartMap
         return map;
     }
 
-    /// <summary>Build a no-events <see cref="WorldSim"/> over <see cref="Build"/>, the player at <see cref="PlayerStart"/>.</summary>
+    /// <summary>The start map's placed events — data the runtime materialises through the <see cref="BehaviourRegistry"/>.</summary>
+    public static EventData[] Events() =>
+    [
+        new EventData
+        {
+            Id = "sign-welcome",
+            X = 6,
+            Y = 4,
+            Trigger = "ActionButton",
+            Kind = "ShowText",
+            Params = { ["text"] = "Welcome to monorpgmaker! Use the arrow keys to explore." },
+        },
+    ];
+
+    /// <summary>Build a <see cref="WorldSim"/> over <see cref="Build"/> + <see cref="Events"/>, the player at <see cref="PlayerStart"/>.</summary>
     public static WorldSim BuildWorld()
     {
-        WorldSimResult result = CreateWorld(Build());
+        WorldSimResult result = CreateWorld(Build(), Events());
         return result.Sim ?? throw new InvalidOperationException(result.Error);
     }
 
@@ -64,12 +80,24 @@ public static class StartMap
             return WorldSimResult.Failure(loaded.Error!);
         }
 
-        return CreateWorld(loaded.Map!);
+        return CreateWorld(loaded.Map!, loaded.Events);
     }
 
-    private static WorldSimResult CreateWorld(TileMap map)
+    private static WorldSimResult CreateWorld(TileMap map, IReadOnlyList<EventData> placements)
     {
+        var events = new List<IMapEvent>(placements.Count);
+        for (var i = 0; i < placements.Count; i++)
+        {
+            BehaviourResult materialised = BehaviourRegistry.TryMaterialize(placements[i]);
+            if (!materialised.Ok)
+            {
+                return WorldSimResult.Failure(materialised.Error!);
+            }
+
+            events.Add(materialised.Event!);
+        }
+
         var player = new Actor("Hero", PlayerStart, maxHp: 30);
-        return WorldSim.TryCreate(map, player, Array.Empty<IMapEvent>(), Array.Empty<DoorRule>());
+        return WorldSim.TryCreate(map, player, events, Array.Empty<DoorRule>());
     }
 }

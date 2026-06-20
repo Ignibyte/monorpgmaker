@@ -174,7 +174,15 @@ Editor logic. The database editor, Modules panel, and inspector follow.
 map (embedded, D-0023), renders it with **LPC tileset sprites** (the `Tileset` model moved to `Engine.World`,
 shared with the editor), and the player **walks it with tile collision + a following `Camera`**. Paint a map in
 the Studio → it's `$data` → the runtime renders and walks it. (Player sprite is a placeholder; walk-cycle
-animation, multi-map, and events-in-runtime are deferred.)
+animation + multi-map deferred.)
+
+**Event/trigger foundation (#18, D-0024):** the unified trigger system began — placed events live in `$data`
+(`{id, cell, trigger, behaviour{kind, params}}`), a `BehaviourRegistry` is the **single binding point** from a
+`kind` to an `IMapEvent` behaviour, and the first **built-in** `ShowText` (no-code dialogue) runs in the playable
+map — walk to the sign, press Space → the line shows. Built **contract-first**: every behaviour implements
+`IMapEvent` + carries a `.expect` (gate:13), built-in and future agent kinds interchangeable through the one
+registry. Next: the built-in library (chest/door/shop/warp), the Studio UI to *place* events, and the
+agent-authored custom behaviours.
 
 ## Cross-cutting
 

@@ -38,7 +38,7 @@ public static class OracleCli
             return 2;
         }
 
-        string[] files = Directory.GetFiles(dir, "*.expect");
+        string[] files = Directory.GetFiles(dir, "*.expect", SearchOption.AllDirectories);
         Array.Sort(files, StringComparer.Ordinal);
 
         int failures = 0;

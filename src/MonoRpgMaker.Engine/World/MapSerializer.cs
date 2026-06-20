@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Xna.Framework;
@@ -13,10 +14,14 @@ namespace MonoRpgMaker.Engine.World;
 /// </summary>
 public static class MapSerializer
 {
-    /// <summary>Serialize <paramref name="map"/> to the JSON <c>$data</c> string (row-major cells).</summary>
-    public static string Serialize(TileMap map)
+    /// <summary>Serialize <paramref name="map"/> to the JSON <c>$data</c> string (row-major cells, no events).</summary>
+    public static string Serialize(TileMap map) => Serialize(map, Array.Empty<EventData>());
+
+    /// <summary>Serialize <paramref name="map"/> and its placed <paramref name="events"/> to the JSON <c>$data</c> string.</summary>
+    public static string Serialize(TileMap map, IReadOnlyList<EventData> events)
     {
         ArgumentNullException.ThrowIfNull(map);
+        ArgumentNullException.ThrowIfNull(events);
 
         var tiles = new TileData[map.Width * map.Height];
         for (var y = 0; y < map.Height; y++)
@@ -28,7 +33,13 @@ public static class MapSerializer
             }
         }
 
-        var data = new TileMapData { Width = map.Width, Height = map.Height, Tiles = tiles };
+        var placed = new EventData[events.Count];
+        for (var i = 0; i < placed.Length; i++)
+        {
+            placed[i] = events[i];
+        }
+
+        var data = new TileMapData { Width = map.Width, Height = map.Height, Tiles = tiles, Events = placed };
         return JsonSerializer.Serialize(data, MapJsonContext.Default.TileMapData);
     }
 
@@ -88,7 +99,29 @@ public static class MapSerializer
             }
         }
 
-        return MapLoadResult.Success(map);
+        // Events are optional; validate each placement ELEMENT (totality — a hostile placement must not throw;
+        // the semantic kind→behaviour binding is the registry's job, so only structural fields are checked here).
+        EventData[] events = data.Events ?? [];
+        for (var i = 0; i < events.Length; i++)
+        {
+            EventData placement = events[i];
+            if (placement is null)
+            {
+                return MapLoadResult.Failure("event " + i + " is null");
+            }
+
+            if (string.IsNullOrEmpty(placement.Id) || string.IsNullOrEmpty(placement.Kind) || string.IsNullOrEmpty(placement.Trigger))
+            {
+                return MapLoadResult.Failure("event " + i + " is missing id, kind, or trigger");
+            }
+
+            if (placement.Trigger is not ("StepOn" or "ActionButton"))
+            {
+                return MapLoadResult.Failure("event " + i + " has an unknown trigger '" + placement.Trigger + "'");
+            }
+        }
+
+        return MapLoadResult.Success(map, events);
     }
 }
 

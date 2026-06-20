@@ -19,6 +19,7 @@ public sealed class WorldSim
     private readonly List<DoorRule> _doors;
     private readonly EventContext _eventContext;
     private readonly OutcomeApplier _applier;
+    private readonly List<GridPoint> _eventCells;
 
     private WorldSim(TileMap map, Actor player, HookSchedule schedule, IEnumerable<DoorRule> doors)
     {
@@ -29,8 +30,18 @@ public sealed class WorldSim
         _doors = new List<DoorRule>(doors);
         _eventContext = new EventContext(State);
         _applier = new OutcomeApplier(State, message => CurrentMessage = message);
+
+        _eventCells = new List<GridPoint>(schedule.Events.Count);
+        foreach (IMapEvent mapEvent in schedule.Events)
+        {
+            _eventCells.Add(mapEvent.Cell);
+        }
+
         SyncDoors();
     }
+
+    /// <summary>The cells of the map's placed events — the host reads these to draw interaction markers.</summary>
+    public IReadOnlyList<GridPoint> EventCells => _eventCells;
 
     /// <summary>
     /// Assemble a simulation from a map, a player, its events and its doors. Returns a typed
