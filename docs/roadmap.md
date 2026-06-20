@@ -210,7 +210,9 @@ record the active map. With this the **Studio-v2 arc is complete** (event placem
 undo/redo #21, multi-map #22); next is the rest of the built-in library (chest / door / shop / give-item) + the
 agent-authored-kind flow. A follow-up (#23) reloads the active map's tileset sheet on a warp (the host signals,
 `Game1` reloads through the catalog — D-0022/D-0025), so maps with different sheets re-skin: the bundled
-start⇄town warp now switches `lpc-mountains`⇄`lpc-grass`.
+start⇄town warp now switches `lpc-mountains`⇄`lpc-grass`. A second follow-up (#24) wires **in-game save/load**
+end-to-end — F5 persists the game (active map + `$game` state + player position) to a user file, F9 restores it
+(`GameSession.TryRestore`, total on a bad save) — so the runtime is replayable across sessions (REQ-006 closed).
 
 ## Cross-cutting
 

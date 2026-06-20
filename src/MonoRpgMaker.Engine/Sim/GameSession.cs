@@ -64,6 +64,41 @@ public sealed class GameSession
         return fired;
     }
 
+    /// <summary>
+    /// Restore the session from <paramref name="save"/> IN PLACE: switch the active map to the saved map id, with
+    /// the <see cref="GameState"/> rebuilt from the saved switches/counters and the player at the saved cell.
+    /// Returns <see langword="false"/> — leaving the active map + state UNCHANGED (no corruption) — when the saved
+    /// map id is not in the registry; never throws on a structurally-valid save. The player's facing + the RNG
+    /// state are not restored (this slice carries the map, the switches/counters, and the position).
+    /// </summary>
+    public bool TryRestore(SaveState save)
+    {
+        ArgumentNullException.ThrowIfNull(save);
+
+        var switches = new KeyValuePair<string, bool>[save.Switches.Length];
+        for (var i = 0; i < save.Switches.Length; i++)
+        {
+            switches[i] = new KeyValuePair<string, bool>(save.Switches[i].Key, save.Switches[i].Value);
+        }
+
+        var counters = new KeyValuePair<string, int>[save.Counters.Length];
+        for (var i = 0; i < save.Counters.Length; i++)
+        {
+            counters[i] = new KeyValuePair<string, int>(save.Counters[i].Key, save.Counters[i].Value);
+        }
+
+        GameState restored = GameState.Restore(switches, counters);
+        WorldSimResult loaded = LoadMap(_maps, save.MapId, restored, new GridPoint(save.PlayerX, save.PlayerY));
+        if (!loaded.Ok)
+        {
+            return false;
+        }
+
+        Active = loaded.Sim!;
+        ActiveMapId = save.MapId;
+        return true;
+    }
+
     private void ApplyPendingWarp()
     {
         if (Active.PendingWarp is not { } warp)

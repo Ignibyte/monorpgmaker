@@ -43,6 +43,57 @@ public sealed class Game1 : RpgGame
         }
     }
 
+    /// <summary>Persist the game (state + active map + player position) to the user's save file (F5).</summary>
+    protected override void OnSaveRequested()
+    {
+        try
+        {
+            string json = SaveSerializer.Serialize(
+                Session.Active.State, Session.Active.Player.Cell, Session.Active.Player.Facing, 0UL, Session.ActiveMapId);
+            string path = SavePath();
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+            File.WriteAllText(path, json);
+        }
+        catch (IOException)
+        {
+            // A bad disk must not crash the game; the save is simply skipped.
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // A protected/sandboxed save directory must not crash the game; the save is simply skipped.
+        }
+    }
+
+    /// <summary>Restore the game from the user's save file (F9) — in place on the live session, if the file is present + valid.</summary>
+    protected override void OnLoadRequested()
+    {
+        string path = SavePath();
+        if (!File.Exists(path))
+        {
+            return;
+        }
+
+        try
+        {
+            SaveLoadResult result = SaveSerializer.Deserialize(File.ReadAllText(path));
+            if (result.Ok)
+            {
+                Session.TryRestore(result.Save!);
+            }
+        }
+        catch (IOException)
+        {
+            // A bad read must not crash the game; the load is simply skipped.
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // A protected/sandboxed save file must not crash the game; the load is simply skipped.
+        }
+    }
+
+    private static string SavePath() =>
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "monorpgmaker", "save.json");
+
     private static GameSession LoadSession()
     {
         GameManifest? manifest = ReadManifest();

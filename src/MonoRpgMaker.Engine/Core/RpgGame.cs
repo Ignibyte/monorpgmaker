@@ -75,6 +75,19 @@ public class RpgGame : Game
     {
     }
 
+    /// <summary>The live session (map set + active sim) — the host reads it to save the game and restores it on load.</summary>
+    protected GameSession Session => _session;
+
+    /// <summary>Called when the player requests a save — the host persists the game (the engine never touches the filesystem — D-0022).</summary>
+    protected virtual void OnSaveRequested()
+    {
+    }
+
+    /// <summary>Called when the player requests a load — the host reads the save + restores the session.</summary>
+    protected virtual void OnLoadRequested()
+    {
+    }
+
     /// <inheritdoc />
     protected override void Update(GameTime gameTime)
     {
@@ -157,6 +170,11 @@ public class RpgGame : Game
 
         if (Pressed(keyboard, Keys.Space) || Pressed(keyboard, Keys.Enter))
             Act();
+
+        if (Pressed(keyboard, Keys.F5))
+            OnSaveRequested();
+        else if (Pressed(keyboard, Keys.F9))
+            OnLoadRequested();
     }
 
     private bool Pressed(KeyboardState keyboard, Keys key) =>

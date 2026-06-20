@@ -88,7 +88,7 @@ This file is the *map of intent*; the slice-by-slice "how" lives in the pipeline
 | Triggers | 🟡 | #13 `ActionButton`/`PressAction`; **#18 — placed events are now `$data`** (`{id, cell, trigger, behaviour{kind, params}}`, total deserialize) the runtime materialises + dispatches; autorun / parallel still deferred |
 | Event behavior (what an event runs) | 🟡 | a contract-first **`BehaviourRegistry`** binds `kind`→`IMapEvent` (#18, D-0024 — the single binding point); the first built-ins **`ShowText`** (no-code dialogue) + **`Warp`** (#22 — the map-to-map transition, the first cross-map behaviour, D-0026), both gate:13-validated; the rest of the library (chest / door / shop / give-item) + the agent flow follow |
 | Doors (switch-driven passability) | ✅ | the lever→door demo |
-| Switches + variables (`GameState`) | 🟡 | named bool switches + int counters; **no persistence** (resets each run) |
+| Switches + variables (`GameState`) | 🟡 | named bool switches + int counters; now **persisted** via in-game save/load (#24 — F5 saves, F9 restores the active map + `$game` state + player position) |
 | Messages | 🟡 | single "current message" banner; no message box, queue, choices, or portraits |
 | Database (id-keyed `Database<T>`; `Item`/`Actor` records) | 🟡 | type + record shapes exist; empty + not wired into the map |
 | Actors / combat | 🟡 | `Actor` carries HP + "defeated"; no combat, enemies, party, stats, or leveling |
