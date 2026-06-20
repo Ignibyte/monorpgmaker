@@ -120,6 +120,7 @@ public sealed class MapCanvas : Control
             return;
         }
 
+        _session.BeginStroke();
         _painting = true;
         PaintAt(pos);
     }
@@ -138,6 +139,11 @@ public sealed class MapCanvas : Control
     protected override void OnPointerReleased(PointerReleasedEventArgs e)
     {
         base.OnPointerReleased(e);
+        if (_painting)
+        {
+            _session.EndStroke();
+        }
+
         _painting = false;
     }
 

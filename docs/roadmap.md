@@ -193,8 +193,13 @@ materialises, so they can't drift.
 **Tileset picker (#20):** the second Studio-v2 slice — choose among the committed LPC sheets (grass / dirt / water
 / mountains) per map; the choice is recorded as a map-level tileset name in `$data` and **both the editor and the
 Player render the chosen sheet**, validated through a single-source `TilesetCatalog` (D-0025). Absent → defaults to
-mountains (existing maps unchanged); unknown → a typed load failure. The remaining Studio-v2 slices (undo/redo,
-multi-map) + the agent-authored-kind flow follow.
+mountains (existing maps unchanged); unknown → a typed load failure.
+
+**Undo/redo (#21):** the third Studio-v2 slice — a command/history spine in the gated `MapPaintSession`: a paint
+**stroke**, each event op (place / edit / remove), and the tileset switch are undoable + redoable, with Undo/Redo
+toolbar buttons + Ctrl/⌘+Z (Ctrl+Shift+Z / Ctrl+Y for redo). Each undoable op records its inverse (a delta), and a
+batched stroke unwinds in reverse; `New`/`Load` reset the history. The remaining Studio-v2 slice (multi-map) + the
+agent-authored-kind flow follow.
 
 ## Cross-cutting
 
