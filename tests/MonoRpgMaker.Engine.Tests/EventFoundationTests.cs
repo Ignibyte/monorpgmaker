@@ -222,7 +222,7 @@ public class StartMapEventTests
     public void Events_IsWelcomeSign()
     {
         EventData[] events = StartMap.Events();
-        Assert.Equal(2, events.Length);
+        Assert.Equal(3, events.Length);
 
         EventData sign = Assert.Single(events, e => e.Id == "sign-welcome");
         Assert.Equal(6, sign.X);
@@ -235,6 +235,10 @@ public class StartMapEventTests
         Assert.Equal("Warp", warp.Kind);
         Assert.Equal("StepOn", warp.Trigger);
         Assert.Equal("town", warp.Params["map"]);
+
+        EventData lever = Assert.Single(events, e => e.Id == "lever-door");
+        Assert.Equal("Lever", lever.Kind);
+        Assert.Equal("door_open", lever.Params["switch"]);
     }
 
     [Fact] // the happy path: LoadWorld materialises the events

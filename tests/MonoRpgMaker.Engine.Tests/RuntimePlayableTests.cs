@@ -127,7 +127,7 @@ public class StartMapTests
     public void CommittedStartJson_MatchesBuild()
     {
         string committed = File.ReadAllText(CommittedStartJsonPath()).Replace("\r\n", "\n", StringComparison.Ordinal);
-        string fromBuild = MapSerializer.Serialize(StartMap.Build(), StartMap.Events()).Replace("\r\n", "\n", StringComparison.Ordinal);
+        string fromBuild = MapSerializer.Serialize(StartMap.Build(), StartMap.Events(), StartMap.Doors()).Replace("\r\n", "\n", StringComparison.Ordinal);
         Assert.Equal(fromBuild, committed);
     }
 

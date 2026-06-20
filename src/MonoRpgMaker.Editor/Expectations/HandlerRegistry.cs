@@ -24,6 +24,7 @@ public static class HandlerRegistry
             ["Warp"] = static () => new WarpEvent(GridPoint.Zero, EventTrigger.StepOn, "town", new GridPoint(3, 4)),
             ["GiveItem"] = static () => new GiveItemEvent(GridPoint.Zero, EventTrigger.ActionButton, "potion", 1, "You found a potion!"),
             ["Chest"] = static () => new ContainerEvent(GridPoint.Zero, EventTrigger.ActionButton, "potion", 1, "chest_opened", "You open the chest."),
+            ["Lever"] = static () => new SwitchEvent(GridPoint.Zero, EventTrigger.ActionButton, "door_open", "You pull the lever."),
         };
 
     /// <summary>Get the handler factory for <paramref name="module"/>; false if none is registered.</summary>

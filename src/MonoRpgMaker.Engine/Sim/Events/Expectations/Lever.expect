@@ -1,0 +1,3 @@
+# Lever sets a switch once (opens a door), then nothing.
+=> SetSwitch(door_open, true); ShowMessage("You pull the lever.")
+door_open=true => (none)

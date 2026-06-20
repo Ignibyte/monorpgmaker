@@ -2041,7 +2041,33 @@
         "x": "2",
         "y": "2"
       }
+    },
+    {
+      "id": "lever-door",
+      "x": 8,
+      "y": 9,
+      "trigger": "ActionButton",
+      "kind": "Lever",
+      "params": {
+        "switch": "door_open",
+        "message": "You pull the lever \u2014 the door grinds open."
+      }
     }
   ],
-  "tileset": "lpc-mountains"
+  "tileset": "lpc-mountains",
+  "doors": [
+    {
+      "x": 10,
+      "y": 9,
+      "switch": "door_open",
+      "closedTile": {
+        "tilesetId": 1,
+        "blocking": true
+      },
+      "openTile": {
+        "tilesetId": 66,
+        "blocking": false
+      }
+    }
+  ]
 }
