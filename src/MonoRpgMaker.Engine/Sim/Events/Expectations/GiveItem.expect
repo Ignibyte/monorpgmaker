@@ -1,0 +1,2 @@
+# GiveItem grants an item count + a message on its trigger.
+=> AddCounter(item.potion, 1); ShowMessage("You found a potion!")

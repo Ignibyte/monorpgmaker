@@ -213,6 +213,10 @@ agent-authored-kind flow. A follow-up (#23) reloads the active map's tileset she
 start⇄town warp now switches `lpc-mountains`⇄`lpc-grass`. A second follow-up (#24) wires **in-game save/load**
 end-to-end — F5 persists the game (active map + `$game` state + player position) to a user file, F9 restores it
 (`GameSession.TryRestore`, total on a bad save) — so the runtime is replayable across sessions (REQ-006 closed).
+A third follow-up (#25) grows the **built-in library** — `Chest` (a give-once container) + `GiveItem` (items as
+`GameState` counters keyed `item.<id>`) join `ShowText` + `Warp` as placeable no-code behaviours, each via the
+contract-first recipe (D-0024), zero engine changes; **door** (needs door-tiles in `$data`) + **shop** (a buy/sell
+UI) are the remaining built-ins.
 
 ## Cross-cutting
 
