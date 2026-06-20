@@ -13,7 +13,7 @@
 | Project | Kind | Responsibility |
 |---|---|---|
 | `MonoRpgMaker.Engine` | class library | The runtime engine: world model, entities, data, the MonoGame host. The one assembly both the player and editor depend on. |
-| `MonoRpgMaker.Player` | desktop GL app | Boots an authored project through the engine. The shipped executable. |
+| `MonoRpgMaker.Player` | desktop GL app | Boots a **bundled `$data`** map (#17, D-0023) through the engine, rendering LPC tileset sprites with a player-following camera. The shipped executable. |
 | `MonoRpgMaker.Editor` | class library | The maker tool's tested logic: headless editing ops (`MapEditor`) + the map-paint view-model (`Tileset`, `MapPaintSession`). Gated (coverage + mutation). |
 | `MonoRpgMaker.Studio` | Avalonia desktop app | The maker **GUI** (D-0022). First slice: a Tiled-like map-paint editor. A thin `[ExcludeFromCodeCoverage]` host over the Editor's logic; stays MonoGame-free. |
 | `MonoRpgMaker.Engine.Tests` | xUnit | Engine + Editor unit/mutation tests. |

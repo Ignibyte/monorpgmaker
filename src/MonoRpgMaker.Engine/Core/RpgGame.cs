@@ -9,24 +9,29 @@ using MonoRpgMaker.Engine.World;
 namespace MonoRpgMaker.Engine.Core;
 
 /// <summary>
-/// The MonoGame host for a running project: it renders a <see cref="WorldSim"/> and
-/// drives it from keyboard input. The host app supplies the scene to run.
+/// The MonoGame host for a running project: it renders a <see cref="WorldSim"/> through a player-following
+/// <see cref="Camera"/> and drives it from keyboard input. The host app supplies the scene to run and (via
+/// <see cref="SetTileset"/>) its tileset art.
 /// </summary>
 /// <remarks>
 /// Excluded from coverage: the composition/host root owning the live MonoGame loop
 /// (window, GPU, input) with no unit-testable contract — the C# analogue of an
-/// excluded <c>main</c>. The simulation it drives (<see cref="WorldSim"/> and its
-/// neighbours) is covered in its own tests.
+/// excluded <c>main</c>. The simulation it drives (<see cref="WorldSim"/>) and the view
+/// math (<see cref="Camera"/>, <see cref="Tileset"/>) are covered in their own tests.
 /// </remarks>
 [ExcludeFromCodeCoverage]
 public class RpgGame : Game
 {
     private const int TileSize = 32;
+    private const int ViewportTilesWide = 20;
+    private const int ViewportTilesHigh = 15;
 
     private readonly GraphicsDeviceManager _graphics;
     private readonly WorldSim _sim;
     private SpriteBatch? _spriteBatch;
     private Texture2D? _pixel;
+    private Texture2D? _tileset;
+    private Tileset? _tilesetInfo;
     private KeyboardState _previous;
 
     /// <summary>Boot the host over the supplied simulation <paramref name="sim"/>.</summary>
@@ -35,8 +40,8 @@ public class RpgGame : Game
         _sim = sim;
         _graphics = new GraphicsDeviceManager(this)
         {
-            PreferredBackBufferWidth = sim.Map.Width * TileSize,
-            PreferredBackBufferHeight = sim.Map.Height * TileSize,
+            PreferredBackBufferWidth = ViewportTilesWide * TileSize,
+            PreferredBackBufferHeight = ViewportTilesHigh * TileSize,
         };
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
@@ -48,6 +53,13 @@ public class RpgGame : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _pixel = new Texture2D(GraphicsDevice, 1, 1);
         _pixel.SetData(new[] { Color.White });
+    }
+
+    /// <summary>Supply the tileset sheet + its geometry; the map then renders as sprites (the host owns its art).</summary>
+    protected void SetTileset(Texture2D texture, Tileset info)
+    {
+        _tileset = texture;
+        _tilesetInfo = info;
     }
 
     /// <inheritdoc />
@@ -72,12 +84,32 @@ public class RpgGame : Game
             return;
         }
 
-        _spriteBatch.Begin();
+        Point offset = ViewOffset();
+
+        // The world (map + player) under the camera translation, point-sampled for crisp pixel art.
+        _spriteBatch.Begin(
+            samplerState: SamplerState.PointClamp,
+            transformMatrix: Matrix.CreateTranslation(-offset.X, -offset.Y, 0));
         DrawMap(_spriteBatch, _pixel);
         DrawPlayer(_spriteBatch, _pixel);
+        _spriteBatch.End();
+
+        // Screen-fixed UI (the message banner) — drawn without the camera translation.
+        _spriteBatch.Begin();
         DrawMessageBanner(_spriteBatch, _pixel);
         _spriteBatch.End();
+
         base.Draw(gameTime);
+    }
+
+    private Point ViewOffset()
+    {
+        var playerPixel = new Point(
+            (_sim.Player.Cell.X * TileSize) + (TileSize / 2),
+            (_sim.Player.Cell.Y * TileSize) + (TileSize / 2));
+        var viewport = new Point(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+        var mapPixels = new Point(_sim.Map.Width * TileSize, _sim.Map.Height * TileSize);
+        return Camera.ViewOffset(playerPixel, viewport, mapPixels);
     }
 
     private static Color ColorFor(Tile tile) => tile.TilesetId switch
@@ -127,8 +159,22 @@ public class RpgGame : Game
         {
             for (var x = 0; x < _sim.Map.Width; x++)
             {
-                var color = ColorFor(_sim.Map.GetTile(new Point(x, y)));
-                batch.Draw(pixel, new Rectangle(x * TileSize, y * TileSize, TileSize - 1, TileSize - 1), color);
+                Tile tile = _sim.Map.GetTile(new Point(x, y));
+                if (_tileset is not null && _tilesetInfo is not null)
+                {
+                    if (_tilesetInfo.TryGetSourceRect(tile.TilesetId, out SourceRect sr))
+                    {
+                        batch.Draw(
+                            _tileset,
+                            new Rectangle(x * TileSize, y * TileSize, TileSize, TileSize),
+                            new Rectangle(sr.X, sr.Y, sr.Width, sr.Height),
+                            Color.White);
+                    }
+                }
+                else
+                {
+                    batch.Draw(pixel, new Rectangle(x * TileSize, y * TileSize, TileSize - 1, TileSize - 1), ColorFor(tile));
+                }
             }
         }
     }
@@ -151,8 +197,8 @@ public class RpgGame : Game
             return;
 
         var bannerHeight = TileSize;
-        var width = _sim.Map.Width * TileSize;
-        var top = (_sim.Map.Height * TileSize) - bannerHeight;
+        var width = GraphicsDevice.Viewport.Width;
+        var top = GraphicsDevice.Viewport.Height - bannerHeight;
         batch.Draw(pixel, new Rectangle(0, top, width, bannerHeight), new Color(0, 0, 0, 200));
         batch.Draw(pixel, new Rectangle(0, top, width, 2), Color.Goldenrod);
     }
