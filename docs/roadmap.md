@@ -218,8 +218,10 @@ A third follow-up (#25) grows the **built-in library** — `Chest` (a give-once 
 contract-first recipe (D-0024), zero engine changes. A fourth (#26) adds **doors** — a map's `$data` carries
 switch-driven door tiles (`DoorData` round-tripped through `MapSerializer`, total) that `GameSession` threads to the
 runtime (`WorldSim.SyncDoors`), plus a placeable **`Lever`** (a give-once switch-setter) that opens them; the
-bundled start map ships a lever→door. Only **shop** (a buy/sell menu UI — inventory display + currency + a shop
-screen) remains as a listed built-in.
+bundled start map ships a lever→door. A fifth (#27) lands **shop**'s gated economy core — a `Shop` event opens a
+buy/sell modal (an `OpenShop` outcome the sim-host will render), and `ShopModel` buys/sells over a `gold` counter +
+`item.<id>` counters (bounds-checked, totality-validated — a negative authored price can't invert the economy).
+The buy/sell **screen** (E2 — the game's first text rendering + modal input) + Studio shop authoring (E3) remain.
 
 ## Cross-cutting
 

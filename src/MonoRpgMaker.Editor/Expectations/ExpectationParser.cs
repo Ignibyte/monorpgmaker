@@ -183,6 +183,14 @@ public static class ExpectationParser
             return new Warp(warpArgs[0][1..^1], new GridPoint(wx, wy));
         }
 
+        if (text.StartsWith("OpenShop(\"", StringComparison.Ordinal) && text.EndsWith("\")", StringComparison.Ordinal))
+        {
+            int start = "OpenShop(\"".Length;
+            int length = text.Length - start - "\")".Length;
+            // Mirror ShowMessage: a lone quote satisfies both ends and yields a negative length — fall through to null, never throw.
+            return length >= 0 ? new OpenShop(text.Substring(start, length)) : null;
+        }
+
         return null;
     }
 

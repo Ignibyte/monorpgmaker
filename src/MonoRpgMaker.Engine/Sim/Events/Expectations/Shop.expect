@@ -1,0 +1,2 @@
+# Shop opens a buy/sell modal with its offers.
+=> OpenShop("potion:5:2")
