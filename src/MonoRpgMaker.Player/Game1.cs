@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using MonoRpgMaker.Abstractions;
 using MonoRpgMaker.Engine.Core;
@@ -25,6 +26,23 @@ public sealed class Game1 : RpgGame
     public Game1()
         : base(LoadSession())
     {
+    }
+
+    /// <summary>Load the UI font from the content pipeline + seed the demo economy (so the bundled shop is transactable).</summary>
+    protected override void LoadContent()
+    {
+        base.LoadContent();
+        try
+        {
+            SetFont(Content.Load<SpriteFont>("font"));
+        }
+        catch (ContentLoadException)
+        {
+            // No font shipped → the game runs textless rather than crashing.
+        }
+
+        Session.Active.State.Add("gold", 100);
+        Session.Active.State.Add("item.potion", 1);
     }
 
     /// <summary>

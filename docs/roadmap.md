@@ -221,7 +221,10 @@ runtime (`WorldSim.SyncDoors`), plus a placeable **`Lever`** (a give-once switch
 bundled start map ships a lever→door. A fifth (#27) lands **shop**'s gated economy core — a `Shop` event opens a
 buy/sell modal (an `OpenShop` outcome the sim-host will render), and `ShopModel` buys/sells over a `gold` counter +
 `item.<id>` counters (bounds-checked, totality-validated — a negative authored price can't invert the economy).
-The buy/sell **screen** (E2 — the game's first text rendering + modal input) + Studio shop authoring (E3) remain.
+A sixth (#28) lands the buy/sell **screen** — a modal renders the open shop (offers + a cursor + the player's gold),
+modal input (Enter buy / S sell / Esc close) drives it, and the game gets its **first in-game text** via a
+content-pipeline `SpriteFont` (D-0027), so messages now show TEXT; a bundled shopkeeper sits at (6,12). Only Studio
+Shop-event **authoring** (E3) remains to finish the shop + the built-in library.
 
 ## Cross-cutting
 

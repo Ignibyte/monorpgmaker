@@ -75,7 +75,16 @@ public static class StartMap
             Y = 9,
             Trigger = "ActionButton",
             Kind = "Lever",
-            Params = { ["switch"] = "door_open", ["message"] = "You pull the lever — the door grinds open." },
+            Params = { ["switch"] = "door_open", ["message"] = "You pull the lever - the door grinds open." },
+        },
+        new EventData
+        {
+            Id = "shopkeeper",
+            X = 6,
+            Y = 12,
+            Trigger = "ActionButton",
+            Kind = "Shop",
+            Params = { ["items"] = "potion:5:2,ether:20:8" },
         },
     ];
 

@@ -33,6 +33,7 @@ public class RpgGame : Game
     private Texture2D? _pixel;
     private Texture2D? _tileset;
     private Tileset? _tilesetInfo;
+    private SpriteFont? _spriteFont;
     private KeyboardState _previous;
     private readonly TilesetTracker _tilesetTracker = new();
 
@@ -67,6 +68,9 @@ public class RpgGame : Game
         _tilesetInfo = info;
     }
 
+    /// <summary>Supply the UI font (the host loads it from the content pipeline); text rendering degrades gracefully when absent.</summary>
+    protected void SetFont(SpriteFont font) => _spriteFont = font;
+
     /// <summary>The catalog name of the active map's tileset — the host loads that sheet's art.</summary>
     protected string MapTilesetName => Sim.Map.TilesetName;
 
@@ -92,8 +96,10 @@ public class RpgGame : Game
     protected override void Update(GameTime gameTime)
     {
         var keyboard = Keyboard.GetState();
-        if (keyboard.IsKeyDown(Keys.Escape))
+        if (Pressed(keyboard, Keys.Escape) && Sim.ActiveShop is null)
+        {
             Exit();
+        }
 
         HandleMovement(keyboard);
         _previous = keyboard;
@@ -127,9 +133,14 @@ public class RpgGame : Game
         DrawPlayer(_spriteBatch, _pixel);
         _spriteBatch.End();
 
-        // Screen-fixed UI (the message banner) — drawn without the camera translation.
+        // Screen-fixed UI (the message banner + the shop modal) — drawn without the camera translation.
         _spriteBatch.Begin();
         DrawMessageBanner(_spriteBatch, _pixel);
+        if (Sim.ActiveShop is not null)
+        {
+            DrawShopScreen(_spriteBatch, _pixel);
+        }
+
         _spriteBatch.End();
 
         base.Draw(gameTime);
@@ -159,6 +170,12 @@ public class RpgGame : Game
 
     private void HandleMovement(KeyboardState keyboard)
     {
+        if (Sim.ActiveShop is not null)
+        {
+            HandleShopInput(keyboard);
+            return;
+        }
+
         if (Pressed(keyboard, Keys.Up))
             Step(Direction.Up);
         else if (Pressed(keyboard, Keys.Down))
@@ -175,6 +192,29 @@ public class RpgGame : Game
             OnSaveRequested();
         else if (Pressed(keyboard, Keys.F9))
             OnLoadRequested();
+    }
+
+    // The shop modal owns input while open: arrows move the cursor, Enter/Space buys, S sells, Escape closes.
+    private void HandleShopInput(KeyboardState keyboard)
+    {
+        ShopState? shop = Sim.ActiveShop;
+        if (shop is null)
+        {
+            return;
+        }
+
+        if (Pressed(keyboard, Keys.Up))
+            Sim.MoveShopCursor(-1);
+        else if (Pressed(keyboard, Keys.Down))
+            Sim.MoveShopCursor(1);
+
+        if (Pressed(keyboard, Keys.Enter) || Pressed(keyboard, Keys.Space))
+            Sim.Buy(shop.Cursor);
+        else if (Pressed(keyboard, Keys.S))
+            Sim.Sell(shop.Cursor);
+
+        if (Pressed(keyboard, Keys.Escape))
+            Sim.CloseShop();
     }
 
     private bool Pressed(KeyboardState keyboard, Keys key) =>
@@ -267,5 +307,42 @@ public class RpgGame : Game
         var top = GraphicsDevice.Viewport.Height - bannerHeight;
         batch.Draw(pixel, new Rectangle(0, top, width, bannerHeight), new Color(0, 0, 0, 200));
         batch.Draw(pixel, new Rectangle(0, top, width, 2), Color.Goldenrod);
+        if (_spriteFont is not null)
+        {
+            batch.DrawString(_spriteFont, Sim.CurrentMessage, new Vector2(8, top + 6), Color.White);
+        }
+    }
+
+    // The buy/sell modal: a centred panel listing the offers (a cursor on the selected row) + the player's gold.
+    private void DrawShopScreen(SpriteBatch batch, Texture2D pixel)
+    {
+        ShopState? shop = Sim.ActiveShop;
+        if (shop is null)
+        {
+            return;
+        }
+
+        var panel = new Rectangle(TileSize * 3, TileSize * 2, GraphicsDevice.Viewport.Width - (TileSize * 6), GraphicsDevice.Viewport.Height - (TileSize * 5));
+        batch.Draw(pixel, panel, new Color(0, 0, 0, 220));
+        batch.Draw(pixel, new Rectangle(panel.X, panel.Y, panel.Width, 2), Color.Goldenrod);
+
+        if (_spriteFont is null)
+        {
+            return;
+        }
+
+        var x = panel.X + 12;
+        var y = panel.Y + 10;
+        batch.DrawString(_spriteFont, "Shop   (Enter buy, S sell, Esc close)", new Vector2(x, y), Color.Goldenrod);
+        y += 28;
+        for (var i = 0; i < shop.Offers.Count; i++)
+        {
+            ShopOffer offer = shop.Offers[i];
+            string row = (i == shop.Cursor ? "> " : "  ") + offer.ItemId + "   buy " + offer.BuyPrice + "   sell " + offer.SellPrice;
+            batch.DrawString(_spriteFont, row, new Vector2(x, y), i == shop.Cursor ? Color.White : Color.LightGray);
+            y += 22;
+        }
+
+        batch.DrawString(_spriteFont, "Gold: " + Sim.State.GetCount("gold"), new Vector2(x, panel.Bottom - 28), Color.Gold);
     }
 }

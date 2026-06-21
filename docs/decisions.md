@@ -17,8 +17,25 @@ Decision D-0023 (2026-06-19) locks the game-distribution model (the repo is the 
 Decision D-0024 (2026-06-20) locks the unified trigger/event model (contract-first, one repeatable pattern).
 Decision D-0025 (2026-06-20) locks the per-map tileset reference (a `$data` name + a single-source catalog).
 Decision D-0026 (2026-06-20) locks the multi-map model (embedded per-map `$data` by id + a manifest; a `GameSession` applies the `Warp` switch).
+Decision D-0027 (2026-06-20) adds in-game text via the MonoGame content pipeline (a `SpriteFont`), a host-only deviation from embedded-resource art.
 
 ---
+
+## D-0027 — In-game text via the MonoGame content pipeline (a `SpriteFont`), host-only
+
+**Decision:** The host renders the game's first in-game text (the message box, the shop screen) via the MonoGame
+**content pipeline** — a `SpriteFont` `.xnb` built by `MonoGame.Content.Builder.Task` from a committed
+`.spritefont` (Arial) in `Player/Content/`. ALL ART stays **embedded** (`Texture2D.FromStream`, D-0022/D-0023);
+only the font uses the pipeline. The `.spritefont` sets a **`DefaultCharacter`** so a glyph outside its
+`CharacterRegions` renders as a fallback instead of crashing `DrawString` (a real crash the inspect caught on an
+em-dash in a bundled message).
+
+**Why:** The game had no text rendering (messages only set the window title). A `SpriteFont` is the standard
+MonoGame text path; the content-builder Task + an empty `Content.mgcb` already existed in `Player.csproj`, so
+wiring a font adds no package and no `packages.lock.json` churn. It stays a **host-only** deviation — `RpgGame`
+draws but never *loads* content; only `Game1` (the Player host) loads the font — so the engine still honours D-0022
+(it never touches the filesystem/content). Art stays embedded because a single-file console binary (D-0023) wants
+its sheets in the assembly, but a font compiled to `.xnb` ships fine alongside.
 
 ## D-0026 — Multi-map: embedded per-map `$data` by id + a manifest; a `GameSession` applies the `Warp` switch
 
