@@ -89,6 +89,11 @@ public sealed class WorldSim
     /// </summary>
     public bool MovePlayer(Direction direction)
     {
+        if (ActiveShop is not null)
+        {
+            return false;
+        }
+
         CurrentMessage = null;
         PendingWarp = null;
         if (!Player.TryStep(direction, Map))
@@ -108,6 +113,11 @@ public sealed class WorldSim
     /// </summary>
     public bool PressAction()
     {
+        if (ActiveShop is not null)
+        {
+            return false;
+        }
+
         CurrentMessage = null;
         PendingWarp = null;
         Point faced = Player.Cell + Player.Facing.ToStep();
@@ -150,6 +160,9 @@ public sealed class WorldSim
 
     /// <summary>Close the open shop (back to no shop) — the sim-host calls this when the player dismisses the modal.</summary>
     public void CloseShop() => ActiveShop = null;
+
+    /// <summary>Move the open shop's buy/sell cursor by <paramref name="delta"/>; a no-op when no shop is open.</summary>
+    public void MoveShopCursor(int delta) => ActiveShop?.MoveCursor(delta);
 
     /// <summary>Apply every door rule: open/close each door cell per its switch.</summary>
     public void SyncDoors()

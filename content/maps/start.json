@@ -2050,7 +2050,17 @@
       "kind": "Lever",
       "params": {
         "switch": "door_open",
-        "message": "You pull the lever \u2014 the door grinds open."
+        "message": "You pull the lever - the door grinds open."
+      }
+    },
+    {
+      "id": "shopkeeper",
+      "x": 6,
+      "y": 12,
+      "trigger": "ActionButton",
+      "kind": "Shop",
+      "params": {
+        "items": "potion:5:2,ether:20:8"
       }
     }
   ],
