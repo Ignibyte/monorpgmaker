@@ -63,6 +63,13 @@ public static class BehaviourRegistry
                 p.TryGetValue("switch", out string? ls) && p.TryGetValue("message", out string? lm)
                     ? BehaviourResult.Success(new SwitchEvent(cell, trigger, ls, lm))
                     : BehaviourResult.Failure("Lever requires a 'switch' + 'message'")),
+        new(
+            "Shop",
+            ["items"],
+            static (cell, trigger, p) =>
+                p.TryGetValue("items", out string? si)
+                    ? BehaviourResult.Success(new ShopEvent(cell, trigger, si))
+                    : BehaviourResult.Failure("Shop requires an 'items' parameter")),
     ];
 
     private static readonly Dictionary<string, Func<GridPoint, EventTrigger, IReadOnlyDictionary<string, string>, BehaviourResult>> Factories = BuildFactories();

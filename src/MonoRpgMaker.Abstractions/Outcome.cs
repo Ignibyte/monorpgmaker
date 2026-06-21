@@ -27,3 +27,6 @@ public sealed record ShowMessage(string Text) : Outcome;
 
 /// <summary>Transition the player to map <paramref name="MapId"/> at target <paramref name="Cell"/>. The sim-host applies the switch (the behaviour only returns this — D-0017).</summary>
 public sealed record Warp(string MapId, GridPoint Cell) : Outcome;
+
+/// <summary>Open a buy/sell shop modal carrying the encoded <paramref name="Offers"/> (<c>id:buy:sell,…</c>). The one host-modal outcome beyond <see cref="ShowMessage"/> — the sim-host renders the screen (the behaviour only returns this — D-0017).</summary>
+public sealed record OpenShop(string Offers) : Outcome;

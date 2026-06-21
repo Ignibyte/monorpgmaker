@@ -29,7 +29,7 @@ public sealed class WorldSim
         _schedule = schedule;
         _doors = new List<DoorRule>(doors);
         _eventContext = new EventContext(State);
-        _applier = new OutcomeApplier(State, message => CurrentMessage = message, warp => PendingWarp = warp);
+        _applier = new OutcomeApplier(State, message => CurrentMessage = message, warp => PendingWarp = warp, shop => ActiveShop = new ShopState(ShopOffer.Parse(shop.Offers)));
 
         _eventCells = new List<GridPoint>(schedule.Events.Count);
         foreach (IMapEvent mapEvent in schedule.Events)
@@ -80,6 +80,9 @@ public sealed class WorldSim
     /// <summary>The transition a fired event requested this step, or null when none — the sim-host reads it to switch maps (D-0017).</summary>
     public Warp? PendingWarp { get; private set; }
 
+    /// <summary>The shop a fired event opened, or null when none is open — the sim-host reads it to draw the buy/sell modal (D-0017).</summary>
+    public ShopState? ActiveShop { get; private set; }
+
     /// <summary>
     /// Try to step the player one tile. Clears any pending message first; on a successful step, fires
     /// step-on events at the new cell and re-syncs doors. Returns true when the player moved.
@@ -112,6 +115,41 @@ public sealed class WorldSim
         SyncDoors();
         return fired;
     }
+
+    /// <summary>Buy the offer at <paramref name="offerIndex"/> in the open shop: a typed failure when no shop is open, the index is out of range, or the player can't afford it (no state change on failure).</summary>
+    public ShopResult Buy(int offerIndex)
+    {
+        if (ActiveShop is null)
+        {
+            return ShopResult.Failure("no shop is open");
+        }
+
+        if (offerIndex < 0 || offerIndex >= ActiveShop.Offers.Count)
+        {
+            return ShopResult.Failure("no such offer");
+        }
+
+        return ShopModel.Buy(State, ActiveShop.Offers[offerIndex]);
+    }
+
+    /// <summary>Sell the offer at <paramref name="offerIndex"/> in the open shop: a typed failure when no shop is open, the index is out of range, or the player owns none (no state change on failure).</summary>
+    public ShopResult Sell(int offerIndex)
+    {
+        if (ActiveShop is null)
+        {
+            return ShopResult.Failure("no shop is open");
+        }
+
+        if (offerIndex < 0 || offerIndex >= ActiveShop.Offers.Count)
+        {
+            return ShopResult.Failure("no such offer");
+        }
+
+        return ShopModel.Sell(State, ActiveShop.Offers[offerIndex]);
+    }
+
+    /// <summary>Close the open shop (back to no shop) — the sim-host calls this when the player dismisses the modal.</summary>
+    public void CloseShop() => ActiveShop = null;
 
     /// <summary>Apply every door rule: open/close each door cell per its switch.</summary>
     public void SyncDoors()

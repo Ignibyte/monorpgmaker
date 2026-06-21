@@ -14,17 +14,20 @@ public sealed class OutcomeApplier
     private readonly GameState _state;
     private readonly Action<string> _showMessage;
     private readonly Action<Warp> _requestWarp;
+    private readonly Action<OpenShop> _openShop;
 
-    /// <summary>Create an applier over the live <paramref name="state"/>, a message sink, and a warp-request sink (the sim-host performs the map switch — D-0017).</summary>
-    public OutcomeApplier(GameState state, Action<string> showMessage, Action<Warp> requestWarp)
+    /// <summary>Create an applier over the live <paramref name="state"/>, a message sink, a warp-request sink (the sim-host performs the map switch — D-0017), and a shop-open sink (the sim-host opens the modal).</summary>
+    public OutcomeApplier(GameState state, Action<string> showMessage, Action<Warp> requestWarp, Action<OpenShop> openShop)
     {
         ArgumentNullException.ThrowIfNull(state);
         ArgumentNullException.ThrowIfNull(showMessage);
         ArgumentNullException.ThrowIfNull(requestWarp);
+        ArgumentNullException.ThrowIfNull(openShop);
 
         _state = state;
         _showMessage = showMessage;
         _requestWarp = requestWarp;
+        _openShop = openShop;
     }
 
     /// <summary>Apply each outcome in <paramref name="outcomes"/>, in order.</summary>
@@ -47,6 +50,9 @@ public sealed class OutcomeApplier
                     break;
                 case Warp warp:
                     _requestWarp(warp);
+                    break;
+                case OpenShop openShop:
+                    _openShop(openShop);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(outcomes), outcome, "Unknown outcome kind.");
